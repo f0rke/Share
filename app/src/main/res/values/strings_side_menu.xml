@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_login">Login</string>
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
+    <string name="no_user_mail_available" translatable="false">error@error.err</string>
+    <string name="not_logged_in_username" translatable="false">Noname</string>
+    <string name="not_logged_in_user_mail" translatable="false">example@vvdst.org</string>
+</resources>

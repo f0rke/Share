@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="password">Password</string>
+    <string name="e_mail">E-mail</string>
+    <string name="action_forgot_password">Forgot password</string>
+    <string name="action_create_account">Create account</string>
+    <string name="action_send_feedback">Send Feedback</string>
+    <string name="action_logout">Logout</string>
+    <string name="not_a_mail_address">This is not an eMail address</string>
+    <string name="not_a_vdst_mail_address">Only VDSt mail adresses are compliant</string>
+    <string name="username_or_password_wrong">Username or password wrong</string>
+    <string name="no_password_provided">No password provided</string>
+    <string name="no_such_user">No such user with the given e-mail address found. There might be a typo or you are not yet registered.</string>
+    <string name="fatal_error_occurred">FATAL ERROR OCCURRED</string>
+    <string name="contact_developer_with_screenshot">Please contact the support with a provided screenshot.</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="user_already_existing">User is already existing. Try to login or reset password.</string>
+    <string name="password_too_weak">Password is too weak. Use at least 8 carachters.</string>
+    <string name="passwords_unequal">Passwords do not equal</string>
+    <string name="action_reset_password">Reset password</string>
+    <string name="reset_password_mail_sent">Reset password mail was sent to given address</string>
+    <string name="successfully_logged_in">Successfully logged in</string>
+    <string name="account_created">Account created</string>
+    <string name="confirm_mail">A new account was created and a confirmation mail was send to \"%s\". Please validate your e-mail address by clicking the link provided inside that mail.</string>
+    <string name="open_mail">Open mail</string>
+    <string name="could_not_open_mail">Could not find any mail App</string>
+</resources>
