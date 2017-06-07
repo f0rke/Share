@@ -1,5 +1,6 @@
 package de.koechig.share.home;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,10 +8,12 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import de.koechig.share.R;
@@ -43,18 +47,30 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
             mPresenter.onAddNewItem();
         }
     };
+    private DialogInterface.OnClickListener mOnSaveClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            if (mItemName != null) {
+                mPresenter.onSaveClicked(mItemName.getText().toString(), mItemDescription != null ? mItemDescription.getText().toString() : null);
+            }
+        }
+    };
 
     private ColorHelper mColorHelper;
+
     //</editor-fold>
 
     //<editor-fold desc="# Views #">
     private DrawerLayout mDrawer;
-    private AppCompatImageView mHeaderIcon;
 
+    private AppCompatImageView mHeaderIcon;
     private TextView mUsernameText;
     private TextView mUserMailText;
     private MenuItem mLoginLogoutView;
     private FloatingActionButton mFAB;
+    private AlertDialog mCreateItemDialog;
+    private TextInputEditText mItemName;
+    private TextInputEditText mItemDescription;
     //</editor-fold>
 
     //<editor-fold desc="# Lifecycle #">
@@ -145,6 +161,16 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         return root;
     }
+
+    @Override
+    public void onDestroy() {
+        if (mCreateItemDialog != null) {
+            mCreateItemDialog.dismiss();
+            mCreateItemDialog = null;
+        }
+        super.onDestroy();
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="# Side menu #">
@@ -201,6 +227,33 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
     //</editor-fold>
 
     //<editor-fold desc="# Open other screens #">
+    @Override
+    public void showCreateItem() {
+        if (isAdded()) {
+            if (mCreateItemDialog == null || !mCreateItemDialog.isShowing()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle(R.string.new_item);
+                View body = LayoutInflater.from(getContext()).inflate(R.layout.layout_create_item, null, false);
+                mItemName = (TextInputEditText) body.findViewById(R.id.input_item_name);
+                mItemDescription = (TextInputEditText) body.findViewById(R.id.input_item_description);
+                builder.setView(body);
+                builder.setPositiveButton(R.string.save, mOnSaveClickListener);
+                builder.setNegativeButton(R.string.cancel, null);
+                mCreateItemDialog = builder.show();
+            }
+        }
+    }
+
+    @Override
+    public void showProgress() {
+        //TODO
+    }
+
+    @Override
+    public void hideProgress() {
+        //TODO
+    }
+
     @Override
     public void showLoginScreen() {
         Intent login = LoginActivity.getStartIntent(getContext());

@@ -24,10 +24,15 @@ public interface HomeScreen {
         void showLoginScreen();
 
         void showLoginSuccessfulMessage();
+
+        void showCreateItem();
+
+        void showProgress();
+
+        void hideProgress();
     }
 
     interface Presenter extends AbstractPresenter<View> {
-
         void onLoginClicked();
 
         void onLogoutClicked();
@@ -35,5 +40,7 @@ public interface HomeScreen {
         void onLoggedIn();
 
         void onAddNewItem();
+
+        void onSaveClicked(String name, String description);
     }
 }
