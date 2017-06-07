@@ -1,63 +1,60 @@
 package de.koechig.share.home;
 
-import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.koechig.share.R;
-import de.koechig.share.ShareApp;
+import de.koechig.share.control.ShareApp;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
 import de.koechig.share.util.ColorHelper;
 
 import static android.support.v4.view.GravityCompat.START;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 
 /**
  * Created by Mumpi_000 on 07.06.2017.
  */
 
 public class HomeFragment extends Fragment implements HomeScreen.View {
+
+    //<editor-fold desc="# Objects #">
     private HomeScreen.Presenter mPresenter;
+    private View.OnClickListener mOnFabClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mPresenter.onAddNewItem();
+        }
+    };
+
     private ColorHelper mColorHelper;
+    //</editor-fold>
 
     //<editor-fold desc="# Views #">
     private DrawerLayout mDrawer;
     private AppCompatImageView mHeaderIcon;
-    private TextView mUsernameText;
 
+    private TextView mUsernameText;
     private TextView mUserMailText;
     private MenuItem mLoginLogoutView;
-    private MenuItem mSettingsView;
-    private MenuItem mFeedbackView;
+    private FloatingActionButton mFAB;
     //</editor-fold>
 
     //<editor-fold desc="# Lifecycle #">
@@ -128,6 +125,9 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         mHeaderIcon = (AppCompatImageView) nav.getHeaderView(0).findViewById(R.id.image_view);
         mUsernameText = (TextView) nav.getHeaderView(0).findViewById(R.id.username);
         mUserMailText = (TextView) nav.getHeaderView(0).findViewById(R.id.user_mail);
+
+        mFAB = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        mFAB.setOnClickListener(mOnFabClickListener);
 
         for (int i = 0; i < nav.getMenu().size(); i++) {
             MenuItem item = nav.getMenu().getItem(i);

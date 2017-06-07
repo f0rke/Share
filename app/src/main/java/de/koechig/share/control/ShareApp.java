@@ -1,12 +1,10 @@
-package de.koechig.share;
+package de.koechig.share.control;
 
 import android.app.Application;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.lang.ref.WeakReference;
-
-import de.koechig.share.control.AuthController;
 
 /**
  * Created by Mumpi_000 on 06.06.2017.

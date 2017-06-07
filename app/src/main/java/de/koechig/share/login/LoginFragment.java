@@ -23,7 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import de.koechig.share.R;
-import de.koechig.share.ShareApp;
+import de.koechig.share.control.ShareApp;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.util.StringHelper;
 

@@ -33,5 +33,7 @@ public interface HomeScreen {
         void onLogoutClicked();
 
         void onLoggedIn();
+
+        void onAddNewItem();
     }
 }

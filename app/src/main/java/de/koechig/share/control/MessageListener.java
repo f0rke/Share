@@ -1,4 +1,4 @@
-package de.koechig.share;
+package de.koechig.share.control;
 
 import android.app.Service;
 import android.content.Intent;

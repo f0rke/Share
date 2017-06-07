@@ -47,6 +47,11 @@ public class HomePresenter implements HomeScreen.Presenter {
     }
 
     @Override
+    public void onAddNewItem() {
+
+    }
+
+    @Override
     public void bindView(View view) {
         mView = view;
         update();
@@ -60,6 +65,18 @@ public class HomePresenter implements HomeScreen.Presenter {
     }
 
     private void handleAuthState() {
+        User user = mAuth.getUser();
+        if (user != null) {
+            loadData();
+        } else {
+            if (mView != null) {
+                mView.showLoginScreen();
+            }
+        }
+    }
+
+    private void loadData() {
+
     }
 
     private void updateSideMenu() {
