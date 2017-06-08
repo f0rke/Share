@@ -41,7 +41,7 @@ public class AuthController {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             User user = dataSnapshot.getValue(User.class);
-            if (!user.equals(mUser)) {
+            if (!user.equalsAllAttributes(mUser)) {
                 updateUser(user);
             }
             notifyListeners();

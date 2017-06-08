@@ -11,7 +11,7 @@ public class User {
     private String lastName;
     private String email;
     private String uid;
-    private List<String> groups;
+    private List<String> rooms;
 
     public User() {
     }
@@ -29,8 +29,8 @@ public class User {
         return lastName;
     }
 
-    public List<String> getGroups() {
-        return groups;
+    public List<String> getRooms() {
+        return rooms;
     }
 
     public String getEmail() {
@@ -46,13 +46,17 @@ public class User {
     }
 
     public boolean equalsAllAttributes(User user) {
-        boolean groupsEquals = true;
-
         return
-                this.uid.equals(user.uid)
-                        && this.email.equals(user.email)
-                        && this.groups.containsAll(user.groups) && user.groups.containsAll(this.groups)
-                        && this.firstName.equals(user.firstName)
-                        && this.lastName.equals(user.lastName);
+                user != null
+
+                        && ((this.uid == null && user.uid == null) || (this.uid != null && this.uid.equals(user.uid)))
+
+                        && ((this.email == null && user.email == null) || (this.email != null && this.email.equals(user.email)))
+
+                        && ((this.rooms == null && user.rooms == null) || (this.rooms != null && this.rooms.containsAll(user.rooms) && user.rooms != null && user.rooms.containsAll(this.rooms)))
+
+                        && ((this.firstName == null && user.firstName == null) || (this.firstName != null && this.firstName.equals(user.firstName)))
+
+                        && ((this.lastName == null && user.lastName == null) || (this.lastName != null && this.lastName.equals(user.lastName)));
     }
 }
