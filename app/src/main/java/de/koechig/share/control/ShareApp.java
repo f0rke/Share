@@ -3,6 +3,7 @@ package de.koechig.share.control;
 import android.app.Application;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.lang.ref.WeakReference;
 
@@ -13,6 +14,7 @@ import java.lang.ref.WeakReference;
 public class ShareApp extends Application {
     private static WeakReference<ShareApp> ourInstance;
     private AuthController mAuthController;
+    private DBController mDB;
 
     public static ShareApp getInstance() {
         return ourInstance.get();
@@ -24,7 +26,8 @@ public class ShareApp extends Application {
         if (ourInstance == null) {
             ourInstance = new WeakReference<>(this);
         }
-        mAuthController = new AuthController(FirebaseAuth.getInstance());
+        mDB = new DBController(FirebaseDatabase.getInstance().getReference());
+        mAuthController = new AuthController(FirebaseAuth.getInstance(), mDB);
     }
 
     public AuthController getAuthController() {

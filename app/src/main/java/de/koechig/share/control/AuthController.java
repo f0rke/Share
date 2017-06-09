@@ -11,8 +11,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -25,7 +23,6 @@ import de.koechig.share.model.User;
  */
 
 public class AuthController {
-    private static final String USERS_KEY = "users";
     private static final String TAG = AuthController.class.getSimpleName();
     private final FirebaseAuth mAuth;
     private List<UserListener> listeners;
@@ -35,7 +32,6 @@ public class AuthController {
             onUserAuthUpdate(firebaseAuth.getCurrentUser());
         }
     };
-    private DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
     private User mUser;
     private ValueEventListener mUserValueListener = new ValueEventListener() {
         @Override
@@ -52,9 +48,11 @@ public class AuthController {
 
         }
     };
+    private DBController mDB;
 
-    public AuthController(FirebaseAuth mAuth) {
+    public AuthController(FirebaseAuth mAuth, DBController database) {
         this.mAuth = mAuth;
+        this.mDB = database;
         this.mAuth.addAuthStateListener(mAuthStateListener);
         this.listeners = new ArrayList<>();
     }
@@ -77,13 +75,13 @@ public class AuthController {
 
     private void updateUser(User user) {
         if (mUser != null) {
-            mDatabase.child(USERS_KEY).child(mUser.getUid()).removeEventListener(mUserValueListener);
+            mDB.removeUserListener(mUser.getUid(), mUserValueListener);
         }
         mUser = user;
         if (mUser == null) {
             notifyListeners();
         } else {
-            mDatabase.child(USERS_KEY).child(mUser.getUid()).addValueEventListener(mUserValueListener);
+            mDB.addUserListener(mUser.getUid(), mUserValueListener);
         }
     }
 
@@ -96,7 +94,7 @@ public class AuthController {
 
     private void onUserAuthUpdate(final FirebaseUser user) {
         if (user != null) {
-            mDatabase.child(USERS_KEY).child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            mDB.getUser(user.getUid(), new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     User tmpUser = dataSnapshot.getValue(User.class);
@@ -110,7 +108,7 @@ public class AuthController {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    FirebaseCrash.logcat(Log.ERROR, USERS_KEY, databaseError.getMessage());
+                    FirebaseCrash.logcat(Log.ERROR, "users", databaseError.getMessage());
                     FirebaseCrash.report(databaseError.toException());
                 }
             });
@@ -126,7 +124,7 @@ public class AuthController {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             final String uid = task.getResult().getUser().getUid();
-                            mDatabase.child(USERS_KEY).child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+                            mDB.addUserListener(uid, new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     User user = dataSnapshot.getValue(User.class);
@@ -156,7 +154,7 @@ public class AuthController {
 
     private User createUserInDatabase(String uid, String mail) {
         User user = new User(mail, uid);
-        mDatabase.child(USERS_KEY).child(uid).setValue(user);
+        mDB.setUser(user);
         return user;
     }
 
