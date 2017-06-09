@@ -12,7 +12,7 @@ public class Item {
     public Item(String name, String description, User creator) {
         this.name = name;
         this.description = description;
-        this.creator = creator.getUid();
+        this.creator = creator.getEmail();
     }
 
     public Item() {
