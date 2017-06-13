@@ -29,7 +29,7 @@ public class ShareApp extends Application {
             ourInstance = new WeakReference<>(this);
         }
         mDB = new DBController(FirebaseDatabase.getInstance().getReference(), new StringHelper());
-        mAuthController = new AuthController(FirebaseAuth.getInstance(), mDB);
+        mAuthController = new AuthController(FirebaseAuth.getInstance(), mDB, new StringHelper());
     }
 
     public AuthController getAuthController() {

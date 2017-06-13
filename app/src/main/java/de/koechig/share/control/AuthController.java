@@ -50,8 +50,10 @@ public class AuthController {
         }
     };
     private DBController mDB;
+    private StringHelper mStringHelper;
 
-    public AuthController(FirebaseAuth mAuth, DBController database) {
+    public AuthController(FirebaseAuth mAuth, DBController database, StringHelper helper) {
+        this.mStringHelper = helper;
         this.mAuth = mAuth;
         this.mDB = database;
         this.mAuth.addAuthStateListener(mAuthStateListener);
@@ -70,9 +72,49 @@ public class AuthController {
         }
     }
 
-//    public void getUser(Callback callback){
-//        mAuth.getCurrentUser()
-//    }
+    public interface OnFinishListener {
+        void onFinish();
+    }
+
+    public void loadUser(final OnFinishListener callback) {
+        if (mUser != null) {
+            callback.onFinish();
+            return;
+        }
+        if (mAuth.getCurrentUser() != null) {
+            final String mail = mAuth.getCurrentUser().getEmail();
+            mDB.getUser(mStringHelper.getIdFromMail(mail), new DBController.Callback<User>() {
+                @Override
+                public void onSuccess(User result) {
+                    if (result == null) {
+                        createUser(mail, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                callback.onFinish();
+                            }
+
+                            @Override
+                            public void onFailure(Exception reason) {
+                                callback.onFinish();
+                            }
+                        });
+                    } else {
+                        updateUser(result);
+                        callback.onFinish();
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    FirebaseCrash.logcat(Log.ERROR, "users", e.getMessage());
+                    FirebaseCrash.report(e);
+                    callback.onFinish();
+                }
+            });
+        } else {
+            callback.onFinish();
+        }
+    }
 
     public User getCurrentUser() {
         return mUser;
@@ -100,7 +142,7 @@ public class AuthController {
     private void onUserAuthUpdate(final FirebaseUser user) {
         if (user != null) {
             final String mail = user.getEmail();
-            String key = new StringHelper().getIdFromMail(mail);
+            String key = mStringHelper.getIdFromMail(mail);
             mDB.getUser(key, new DBController.Callback<User>() {
                 @Override
                 public void onSuccess(User result) {

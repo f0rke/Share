@@ -13,6 +13,12 @@ import de.koechig.share.model.User;
 class LaunchPresenter implements LaunchScreen.Presenter {
     private LaunchScreen.View mView;
     private final AuthController mAuth;
+    private AuthController.OnFinishListener mUserLoadListener = new AuthController.OnFinishListener() {
+        @Override
+        public void onFinish() {
+            onUserLoaded();
+        }
+    };
 
     public LaunchPresenter(AuthController authController) {
         mAuth = authController;
@@ -26,6 +32,17 @@ class LaunchPresenter implements LaunchScreen.Presenter {
 
     @Override
     public void update() {
+        User user = mAuth.getCurrentUser();
+        if (user != null) {
+            if (mView != null) {
+                mView.showHomeScreen();
+            }
+        } else {
+            mAuth.loadUser(mUserLoadListener);
+        }
+    }
+
+    private void onUserLoaded() {
         User user = mAuth.getCurrentUser();
         if (user != null) {
             if (mView != null) {
