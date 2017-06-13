@@ -259,16 +259,16 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         startActivityForResult(login, LoginScreen.REQUEST_LOGIN);
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        mPresenter.bindView(this);
-//        if (requestCode == LoginScreen.REQUEST_LOGIN) {
-//            if (resultCode == LoginScreen.RESULT_LOGGED_IN) {
-//                mPresenter.onLoggedIn();
-//            }
-//        }
-//    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mPresenter.bindView(this);
+        if (requestCode == LoginScreen.REQUEST_LOGIN) {
+            if (resultCode == LoginScreen.RESULT_LOGGED_IN) {
+                mPresenter.onLoggedIn();
+            }
+        }
+    }
     //</editor-fold>
 
     //<editor-fold desc="# Messages #">

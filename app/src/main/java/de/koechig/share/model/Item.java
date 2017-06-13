@@ -1,5 +1,7 @@
 package de.koechig.share.model;
 
+import android.support.annotation.Nullable;
+
 /**
  * Created by Mumpi_000 on 07.06.2017.
  */
@@ -9,10 +11,12 @@ public class Item {
     private String name;
     private String description;
 
-    public Item(String name, String description, User creator) {
+    public Item(String name,
+                @Nullable String description,
+                User creator) {
         this.name = name;
         this.description = description;
-        this.creator = creator.getEmail();
+        this.creator = creator.getKey();
     }
 
     public Item() {

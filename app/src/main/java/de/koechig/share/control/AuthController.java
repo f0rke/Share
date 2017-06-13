@@ -122,13 +122,13 @@ public class AuthController {
 
     private void updateUser(User user) {
         if (mUser != null) {
-            mDB.removeUserListener(mUser.getKey(), mUserValueListener);
+            mDB.unsubscribeFromUserChanges(mUser.getKey(), mUserValueListener);
         }
         mUser = user;
         if (mUser == null) {
             notifyListeners();
         } else {
-            mDB.addUserListener(mUser.getKey(), mUserValueListener);
+            mDB.subscribeToUserChanges(mUser.getKey(), mUserValueListener);
         }
     }
 

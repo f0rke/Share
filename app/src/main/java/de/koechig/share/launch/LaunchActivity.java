@@ -55,4 +55,14 @@ public class LaunchActivity extends AppCompatActivity implements LaunchScreen.Vi
         Intent login = LoginActivity.getStartIntent(this);
         startActivityForResult(login, LoginScreen.REQUEST_LOGIN);
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == LoginScreen.REQUEST_LOGIN) {
+            if (resultCode != LoginScreen.RESULT_LOGGED_IN) {
+                finish();
+            }
+        }
+    }
 }

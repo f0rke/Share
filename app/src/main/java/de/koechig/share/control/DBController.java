@@ -50,11 +50,11 @@ public class DBController {
         });
     }
 
-    public void removeUserListener(String key, ValueEventListener listener) {
+    public void unsubscribeFromUserChanges(String key, ValueEventListener listener) {
         mDatabase.child(USERS_NODE).child(key).removeEventListener(listener);
     }
 
-    public void addUserListener(String key, ValueEventListener listener) {
+    public void subscribeToUserChanges(String key, ValueEventListener listener) {
         mDatabase.child(USERS_NODE).child(key).addValueEventListener(listener);
     }
 
@@ -74,10 +74,6 @@ public class DBController {
             });
         }
     }
-
-//    public void deleteUser(User user){
-//        mDatabase.child(USERS_NODE).child(user.getEmail()).removeValue();
-//    }
 
     public interface Callback<T> {
         void onSuccess(T result);
