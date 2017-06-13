@@ -6,11 +6,10 @@ import java.util.List;
  * Created by Mumpi_000 on 07.06.2017.
  */
 
-public class User {
+public class User extends DB_Item {
     private String firstName;
     private String lastName;
     private String email;
-    private String key;
     private List<String> rooms;
 
     public User() {
@@ -35,10 +34,6 @@ public class User {
 
     public String getEmail() {
         return email;
-    }
-
-    public String getKey() {
-        return key;
     }
 
     public void setKey(String key) {

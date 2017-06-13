@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
  * Created by Mumpi_000 on 07.06.2017.
  */
 
-public class Item {
+public class Item extends DB_Item {
     private String creator;
     private String name;
     private String description;

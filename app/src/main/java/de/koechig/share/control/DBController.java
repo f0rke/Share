@@ -9,6 +9,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import de.koechig.share.model.Channel;
+import de.koechig.share.model.Item;
 import de.koechig.share.model.User;
 import de.koechig.share.util.StringHelper;
 
@@ -26,7 +28,7 @@ public class DBController {
 
     private static final String USERS_NODE = "users";
     private static final String MEMBERS_NODE = "members";
-    private static final String ROOMS_NODE = "rooms";
+    private static final String CHANNELS_NODE = "channels";
     private static final String ITEMS_NODE = "items";
 
     public DBController(DatabaseReference mDatabase, StringHelper stringHelper) {
@@ -82,4 +84,16 @@ public class DBController {
     }
     //</editor-fold>
 
+    public void submitNewItemToChannel(Item item, Channel channel){
+        mDatabase.child(ITEMS_NODE).child(channel.getKey()).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+
+                } else {
+
+                }
+            }
+        });
+    }
 }

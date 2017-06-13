@@ -179,7 +179,8 @@ public class AuthController {
                     @Override
                     public void onComplete(@NonNull final Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            mDB.getUser(mail, new DBController.Callback<User>() {
+                            String key = mStringHelper.getIdFromMail(mail);
+                            mDB.getUser(key, new DBController.Callback<User>() {
                                 @Override
                                 public void onSuccess(User result) {
                                     if (result == null) {
