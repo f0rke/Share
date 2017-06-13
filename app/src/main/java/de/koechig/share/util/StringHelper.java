@@ -14,4 +14,18 @@ public class StringHelper {
     public boolean isValidPassword(String password) {
         return !TextUtils.isEmpty(password);
     }
+
+    public String getIdFromMail(String mail) {
+        if (isMail(mail)) {
+            String prefix = mail.split("@")[0];
+            prefix = prefix.replaceAll("\\.", "");
+            prefix = prefix.replaceAll("#", "");
+            prefix = prefix.replaceAll("$", "");
+            prefix = prefix.replaceAll("\\[", "");
+            prefix = prefix.replaceAll("]", "");
+            return prefix;
+        } else {
+            return null;
+        }
+    }
 }

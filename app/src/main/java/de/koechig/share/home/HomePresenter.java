@@ -62,7 +62,7 @@ public class HomePresenter implements HomeScreen.Presenter {
 
     @Override
     public void onSaveClicked(final String name, String description) {
-        final Item item = new Item(name, description, mAuth.getUser());
+        final Item item = new Item(name, description, mAuth.getCurrentUser());
         if (mView != null) {
             mView.showProgress();
         }
@@ -113,7 +113,7 @@ public class HomePresenter implements HomeScreen.Presenter {
     }
 
     private void handleAuthState() {
-        User user = mAuth.getUser();
+        User user = mAuth.getCurrentUser();
         if (user != null) {
             loadData();
         } else {
@@ -129,7 +129,7 @@ public class HomePresenter implements HomeScreen.Presenter {
 
     private void updateSideMenu() {
         if (mView != null) {
-            User user = mAuth.getUser();
+            User user = mAuth.getCurrentUser();
             if (user != null) {
                 String username = user.getFirstName() != null ? user.getFirstName() : "";
                 mView.setUsername(username);

@@ -7,6 +7,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.lang.ref.WeakReference;
 
+import de.koechig.share.util.StringHelper;
+
 /**
  * Created by Mumpi_000 on 06.06.2017.
  */
@@ -26,7 +28,7 @@ public class ShareApp extends Application {
         if (ourInstance == null) {
             ourInstance = new WeakReference<>(this);
         }
-        mDB = new DBController(FirebaseDatabase.getInstance().getReference());
+        mDB = new DBController(FirebaseDatabase.getInstance().getReference(), new StringHelper());
         mAuthController = new AuthController(FirebaseAuth.getInstance(), mDB);
     }
 

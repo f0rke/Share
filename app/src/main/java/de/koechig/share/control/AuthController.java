@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.koechig.share.model.User;
+import de.koechig.share.util.StringHelper;
 
 /**
  * Created by Mumpi_000 on 06.06.2017.
@@ -69,19 +70,23 @@ public class AuthController {
         }
     }
 
-    public User getUser() {
+//    public void getUser(Callback callback){
+//        mAuth.getCurrentUser()
+//    }
+
+    public User getCurrentUser() {
         return mUser;
     }
 
     private void updateUser(User user) {
         if (mUser != null) {
-            mDB.removeUserListener(mUser.getUid(), mUserValueListener);
+            mDB.removeUserListener(mUser.getKey(), mUserValueListener);
         }
         mUser = user;
         if (mUser == null) {
             notifyListeners();
         } else {
-            mDB.addUserListener(mUser.getUid(), mUserValueListener);
+            mDB.addUserListener(mUser.getKey(), mUserValueListener);
         }
     }
 
@@ -94,22 +99,31 @@ public class AuthController {
 
     private void onUserAuthUpdate(final FirebaseUser user) {
         if (user != null) {
-            mDB.getUser(user.getUid(), new ValueEventListener() {
+            final String mail = user.getEmail();
+            String key = new StringHelper().getIdFromMail(mail);
+            mDB.getUser(key, new DBController.Callback<User>() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    User tmpUser = dataSnapshot.getValue(User.class);
-                    if (tmpUser == null) {
-                        tmpUser = createUserInDatabase(user.getUid(), user.getEmail());
-                    } else if (tmpUser.getUid() == null || tmpUser.getUid().isEmpty()) {
-                        tmpUser.setUid(user.getUid());
+                public void onSuccess(User result) {
+                    if (result == null) {
+                        createUser(mail, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                            }
+
+                            @Override
+                            public void onFailure(Exception reason) {
+                                updateUser(null);
+                            }
+                        });
+                    } else {
+                        updateUser(result);
                     }
-                    updateUser(tmpUser);
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    FirebaseCrash.logcat(Log.ERROR, "users", databaseError.getMessage());
-                    FirebaseCrash.report(databaseError.toException());
+                public void onError(Exception e) {
+                    FirebaseCrash.logcat(Log.ERROR, "users", e.getMessage());
+                    FirebaseCrash.report(e);
                 }
             });
         } else {
@@ -121,41 +135,43 @@ public class AuthController {
         mAuth.signInWithEmailAndPassword(mail, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    public void onComplete(@NonNull final Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            final String uid = task.getResult().getUser().getUid();
-                            mDB.addUserListener(uid, new ValueEventListener() {
+                            mDB.getUser(mail, new DBController.Callback<User>() {
                                 @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    User user = dataSnapshot.getValue(User.class);
-                                    if (user == null) {
-                                        user = createUserInDatabase(uid, mail);
-                                    } else if (user.getUid() == null || user.getUid().isEmpty()) {
-                                        user.setUid(uid);
+                                public void onSuccess(User result) {
+                                    if (result == null) {
+                                        createUser(mail, callback);
                                     }
-
-                                    updateUser(user);
+                                    updateUser(result);
                                     callback.onSuccess();
                                 }
 
                                 @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    callback.onFailure(databaseError.toException());
+                                public void onError(Exception e) {
+                                    callback.onFailure(e);
                                 }
                             });
-                        } else
-
-                        {
+                        } else {
                             callback.onFailure(task.getException());
                         }
                     }
                 });
     }
 
-    private User createUserInDatabase(String uid, String mail) {
-        User user = new User(mail, uid);
-        mDB.setUser(user);
-        return user;
+    private void createUser(String mail, final Callback callback) {
+        mDB.createUser(mail, new DBController.Callback<User>() {
+            @Override
+            public void onSuccess(User result) {
+                updateUser(result);
+                callback.onSuccess();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                callback.onFailure(e);
+            }
+        });
     }
 
     public void sendPasswordResetMail(String mail, final Callback callback) {

@@ -21,12 +21,11 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import de.koechig.share.R;
-import de.koechig.share.control.ShareApp;
 import de.koechig.share.control.AuthController;
+import de.koechig.share.control.ShareApp;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
 import de.koechig.share.util.ColorHelper;
@@ -260,16 +259,16 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         startActivityForResult(login, LoginScreen.REQUEST_LOGIN);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        mPresenter.bindView(this);
-        if (requestCode == LoginScreen.REQUEST_LOGIN) {
-            if (resultCode == LoginScreen.RESULT_LOGGED_IN) {
-                mPresenter.onLoggedIn();
-            }
-        }
-    }
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        mPresenter.bindView(this);
+//        if (requestCode == LoginScreen.REQUEST_LOGIN) {
+//            if (resultCode == LoginScreen.RESULT_LOGGED_IN) {
+//                mPresenter.onLoggedIn();
+//            }
+//        }
+//    }
     //</editor-fold>
 
     //<editor-fold desc="# Messages #">

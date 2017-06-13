@@ -10,15 +10,15 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
-    private String uid;
+    private String key;
     private List<String> rooms;
 
     public User() {
     }
 
-    public User(String email, String uid) {
+    public User(String email, String key) {
         this.email = email;
-        this.uid = uid;
+        this.key = key;
     }
 
     public String getFirstName() {
@@ -37,19 +37,19 @@ public class User {
         return email;
     }
 
-    public String getUid() {
-        return uid;
+    public String getKey() {
+        return key;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public boolean equalsAllAttributes(User user) {
         return
                 user != null
 
-                        && ((this.uid == null && user.uid == null) || (this.uid != null && this.uid.equals(user.uid)))
+                        && ((this.key == null && user.key == null) || (this.key != null && this.key.equals(user.key)))
 
                         && ((this.email == null && user.email == null) || (this.email != null && this.email.equals(user.email)))
 
