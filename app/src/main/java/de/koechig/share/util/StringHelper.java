@@ -17,15 +17,82 @@ public class StringHelper {
 
     public String getIdFromMail(String mail) {
         if (isMail(mail)) {
-            String prefix = mail.split("@")[0];
-            prefix = prefix.replaceAll("\\.", "");
-            prefix = prefix.replaceAll("#", "");
-            prefix = prefix.replaceAll("$", "");
-            prefix = prefix.replaceAll("\\[", "");
-            prefix = prefix.replaceAll("]", "");
+            String prefix = getMailPrefix(mail);
+            prefix = removeUnallowedFirebaseKeyChars(prefix);
             return prefix;
         } else {
             return null;
         }
+    }
+
+    private String getMailPrefix(String mail) {
+        return isMail(mail) ? mail.split("@")[0] : null;
+    }
+
+    private String removeUnallowedFirebaseKeyChars(String prefix) {
+        String value = prefix.replaceAll("\\.", "");
+        value = value.replaceAll("#", "");
+        value = value.replaceAll("$", "");
+        value = value.replaceAll("\\[", "");
+        value = value.replaceAll("]", "");
+        return value;
+    }
+
+    public String getFirstNameFromMail(String mail) {
+        if (isMail(mail)) {
+            String prefix = getMailPrefix(mail);
+            if (prefix != null) {
+                String[] arr;
+                if (prefix.contains(".")) {
+                    arr = prefix.split("\\.");
+                } else if (prefix.contains("-")) {
+                    arr = prefix.split("-");
+                } else if (prefix.contains("_")) {
+                    arr = prefix.split("_");
+                } else {
+                    arr = null;
+                }
+                if (arr != null && arr.length >= 1) {
+                    String name = arr[0];
+                    return capitalizeFirstLetter(name);
+                }
+            }
+        }
+        return null;
+    }
+
+    public String getLastNameFromMail(String mail) {
+        if (isMail(mail)) {
+            String prefix = getMailPrefix(mail);
+            if (prefix != null) {
+                String[] arr;
+                if (prefix.contains(".")) {
+                    arr = prefix.split("\\.");
+                } else if (prefix.contains("-")) {
+                    arr = prefix.split("-");
+                } else if (prefix.contains("_")) {
+                    arr = prefix.split("_");
+                } else {
+                    arr = null;
+                }
+                if (arr != null && arr.length >= 2) {
+                    String name = arr[arr.length - 1];
+                    return capitalizeFirstLetter(name);
+                }
+            }
+        }
+        return null;
+    }
+
+    public String capitalizeFirstLetter(String name) {
+        if (name != null) {
+            char[] arr = name.toCharArray();
+            if (arr.length > 0) {
+                String firstChar = String.valueOf(arr[0]);
+                arr[0] = firstChar.toUpperCase().toCharArray()[0];
+                name = new String(arr);
+            }
+        }
+        return name;
     }
 }

@@ -6,8 +6,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.List;
+
 import de.koechig.share.control.AuthController;
+import de.koechig.share.control.DBController;
 import de.koechig.share.home.HomeScreen.View;
+import de.koechig.share.model.Channel;
 import de.koechig.share.model.Item;
 import de.koechig.share.model.User;
 
@@ -20,6 +24,7 @@ public class HomePresenter implements HomeScreen.Presenter {
     //Member variables
     private View mView;
     private final AuthController mAuth;
+    private DBController mDb;
     private AuthController.UserListener mUserListener = new AuthController.UserListener() {
         @Override
         public void onUpdated() {
@@ -28,8 +33,9 @@ public class HomePresenter implements HomeScreen.Presenter {
     };
     private HomeResourceProvider mProvider;
 
-    public HomePresenter(AuthController auth, HomeResourceProvider provider) {
+    public HomePresenter(AuthController auth, DBController db, HomeResourceProvider provider) {
         mAuth = auth;
+        mDb = db;
         mProvider = provider;
     }
 
@@ -124,7 +130,17 @@ public class HomePresenter implements HomeScreen.Presenter {
     }
 
     private void loadData() {
+        mDb.fetchChannels(new DBController.RetrieveCallback<List<Channel>>() {
+            @Override
+            public void onSuccess(List<Channel> result) {
 
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
     }
 
     private void updateSideMenu() {

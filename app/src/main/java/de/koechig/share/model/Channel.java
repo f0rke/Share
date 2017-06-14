@@ -7,9 +7,32 @@ import java.util.List;
  */
 
 public class Channel extends DB_Item {
-    private List<User> members;
-    private Item lastEntry;
+    private List<String> members;
+    private String lastEntry;
+    private String lastContributor;
+    private long lastEntryTimestamp;
     private String name;
 
+    public Channel() {
+    }
 
+    public List<String> getMembers() {
+        return members;
+    }
+
+    public String getLastEntry() {
+        return lastEntry;
+    }
+
+    public String getLastContributor() {
+        return lastContributor;
+    }
+
+    public long getLastEntryTimestamp() {
+        return lastEntryTimestamp;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

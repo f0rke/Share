@@ -38,7 +38,7 @@ public class AuthController {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             User user = dataSnapshot.getValue(User.class);
-            if (!user.equalsAllAttributes(mUser)) {
+            if (user == null || !user.equalsAllAttributes(mUser)) {
                 updateUser(user);
             }
             notifyListeners();
@@ -83,7 +83,7 @@ public class AuthController {
         }
         if (mAuth.getCurrentUser() != null) {
             final String mail = mAuth.getCurrentUser().getEmail();
-            mDB.getUser(mStringHelper.getIdFromMail(mail), new DBController.Callback<User>() {
+            mDB.fetchUser(mStringHelper.getIdFromMail(mail), new DBController.RetrieveCallback<User>() {
                 @Override
                 public void onSuccess(User result) {
                     if (result == null) {
@@ -143,7 +143,7 @@ public class AuthController {
         if (user != null) {
             final String mail = user.getEmail();
             String key = mStringHelper.getIdFromMail(mail);
-            mDB.getUser(key, new DBController.Callback<User>() {
+            mDB.fetchUser(key, new DBController.RetrieveCallback<User>() {
                 @Override
                 public void onSuccess(User result) {
                     if (result == null) {
@@ -180,7 +180,7 @@ public class AuthController {
                     public void onComplete(@NonNull final Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             String key = mStringHelper.getIdFromMail(mail);
-                            mDB.getUser(key, new DBController.Callback<User>() {
+                            mDB.fetchUser(key, new DBController.RetrieveCallback<User>() {
                                 @Override
                                 public void onSuccess(User result) {
                                     if (result == null) {
@@ -203,7 +203,7 @@ public class AuthController {
     }
 
     private void createUser(String mail, final Callback callback) {
-        mDB.createUser(mail, new DBController.Callback<User>() {
+        mDB.createUser(mail, new DBController.RetrieveCallback<User>() {
             @Override
             public void onSuccess(User result) {
                 updateUser(result);

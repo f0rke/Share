@@ -9,6 +9,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.koechig.share.model.Channel;
 import de.koechig.share.model.Item;
 import de.koechig.share.model.User;
@@ -37,7 +40,7 @@ public class DBController {
     }
 
     //<editor-fold desc="# Users #">
-    public void getUser(String key, final Callback<User> callback) {
+    public void fetchUser(String key, final RetrieveCallback<User> callback) {
         mDatabase.child(USERS_NODE).child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -60,10 +63,18 @@ public class DBController {
         mDatabase.child(USERS_NODE).child(key).addValueEventListener(listener);
     }
 
-    public void createUser(String mail, final Callback<User> callback) {
+    public void createUser(String mail, final RetrieveCallback<User> callback) {
         String key = mStringHelper.getIdFromMail(mail);
         if (key != null) {
             final User user = new User(mail, key);
+            String first = mStringHelper.getFirstNameFromMail(mail);
+            if (first != null) {
+                user.setFirstName(first);
+            }
+            String last = mStringHelper.getLastNameFromMail(mail);
+            if (last != null) {
+                user.setLastName(last);
+            }
             mDatabase.child(USERS_NODE).child(key).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -76,24 +87,49 @@ public class DBController {
             });
         }
     }
+    //</editor-fold>
 
-    public interface Callback<T> {
+    //<editor-fold desc="# Channels #">
+    public void fetchChannels(final RetrieveCallback<List<Channel>> callback) {
+        mDatabase.child(CHANNELS_NODE).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                List<Channel> channels;
+                if (dataSnapshot.getValue() != null) {
+                    channels = new ArrayList<Channel>() {{
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            Channel channel = child.getValue(Channel.class);
+                            add(channel);
+                        }
+                    }};
+                } else {
+                    channels = new ArrayList<>(0);
+                }
+                callback.onSuccess(channels);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError(databaseError.toException());
+            }
+        });
+    }
+
+    public void createChannel() {
+
+    }
+
+    public void submitNewItemToChannel(Item item, Channel channel, User creator) {
+
+    }
+    //</editor-fold>
+
+
+    //<editor-fold desc="# Inner classes #">
+    public interface RetrieveCallback<T> {
         void onSuccess(T result);
 
         void onError(Exception e);
     }
     //</editor-fold>
-
-    public void submitNewItemToChannel(Item item, Channel channel){
-        mDatabase.child(ITEMS_NODE).child(channel.getKey()).setValue(item).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-
-                } else {
-
-                }
-            }
-        });
-    }
 }

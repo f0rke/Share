@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
+import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
@@ -82,6 +83,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         super.onCreate(savedInstanceState);
         mColorHelper = new ColorHelper(getContext());
         AuthController auth = ShareApp.getInstance().getAuthController();
+        DBController db = ShareApp.getInstance().getDb();
         HomePresenter.HomeResourceProvider provider = new HomePresenter.HomeResourceProvider() {
             @Override
             public String getNoUserMailErrorString() {
@@ -98,7 +100,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
                 return getString(R.string.not_logged_in_user_mail);
             }
         };
-        mPresenter = new HomePresenter(auth, provider);
+        mPresenter = new HomePresenter(auth, db, provider);
     }
 
     @Override

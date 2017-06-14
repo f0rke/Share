@@ -10,7 +10,7 @@ public class User extends DB_Item {
     private String firstName;
     private String lastName;
     private String email;
-    private List<String> rooms;
+    private List<String> channels;
 
     public User() {
     }
@@ -28,8 +28,8 @@ public class User extends DB_Item {
         return lastName;
     }
 
-    public List<String> getRooms() {
-        return rooms;
+    public List<String> getChannels() {
+        return channels;
     }
 
     public String getEmail() {
@@ -48,10 +48,18 @@ public class User extends DB_Item {
 
                         && ((this.email == null && user.email == null) || (this.email != null && this.email.equals(user.email)))
 
-                        && ((this.rooms == null && user.rooms == null) || (this.rooms != null && this.rooms.containsAll(user.rooms) && user.rooms != null && user.rooms.containsAll(this.rooms)))
+                        && ((this.channels == null && user.channels == null) || (this.channels != null && this.channels.containsAll(user.channels) && user.channels != null && user.channels.containsAll(this.channels)))
 
                         && ((this.firstName == null && user.firstName == null) || (this.firstName != null && this.firstName.equals(user.firstName)))
 
                         && ((this.lastName == null && user.lastName == null) || (this.lastName != null && this.lastName.equals(user.lastName)));
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }
