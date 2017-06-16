@@ -1,6 +1,9 @@
 package de.koechig.share.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.koechig.share.util.StringHelper;
 
@@ -9,7 +12,7 @@ import de.koechig.share.util.StringHelper;
  */
 
 public class Channel extends DB_Item {
-    private List<String> members;
+    private Map<String, Boolean> members;
     private String lastEntry;
     private String lastContributor;
     private long lastEntryTimestamp;
@@ -22,10 +25,21 @@ public class Channel extends DB_Item {
         StringHelper helper = new StringHelper();
         this.key = helper.convertToId(name);
         this.name = name;
-        this.members = members;
+        this.members = new HashMap<>();
+        for (String member : members) {
+            this.members.put(member, true);
+        }
     }
 
-    public List<String> getMembers() {
+    public List<String> getMemberList() {
+        List<String> arr = new ArrayList<>();
+        for (String member : members.keySet()) {
+            arr.add(member);
+        }
+        return arr;
+    }
+
+    public Map<String, Boolean> getMembers() {
         return members;
     }
 

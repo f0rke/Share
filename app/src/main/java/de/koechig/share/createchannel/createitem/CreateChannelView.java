@@ -1,4 +1,4 @@
-package de.koechig.share.createitem;
+package de.koechig.share.createchannel.createitem;
 
 import android.content.DialogInterface;
 import android.support.design.widget.TextInputEditText;
@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import java.util.Arrays;
 
 import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
@@ -19,24 +21,22 @@ import de.koechig.share.control.ShareApp;
  *         © mobile concepts GmbH 2016
  */
 
-public class CreateItemView implements CreateItemScreen.View {
+public class CreateChannelView implements CreateChannelScreen.View {
     protected final Fragment mStub;
-    protected CreateItemScreen.Presenter mPresenter;
-    protected android.support.v7.app.AlertDialog mCreateItemDialog;
+    protected CreateChannelScreen.Presenter mPresenter;
+    protected AlertDialog mCreateItemDialog;
 
     private TextInputEditText mItemName;
-    private TextInputEditText mItemDescription;
     private DialogInterface.OnClickListener mOnSaveClickListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
             if (mItemName != null) {
-                mPresenter.onSaveClicked(mItemName.getText().toString(), mItemDescription != null ? mItemDescription.getText().toString() : null);
+                mPresenter.onSaveClicked(mItemName.getText().toString(), Arrays.asList("moritzkoechig","stefanbaehr"));
             }
         }
     };
 
-
-    public CreateItemView(Fragment parent) {
+    public CreateChannelView(Fragment parent) {
         mStub = parent;
     }
 
@@ -44,7 +44,7 @@ public class CreateItemView implements CreateItemScreen.View {
     public void onCreate() {
         AuthController auth = ShareApp.getInstance().getAuthController();
         DBController db = ShareApp.getInstance().getDb();
-        mPresenter = new CreateItemPresenter(auth, db);
+        mPresenter = new CreateChannelPresenter(db);
     }
 
     public void onResume() {
@@ -74,14 +74,13 @@ public class CreateItemView implements CreateItemScreen.View {
     }
 
     @Override
-    public void showCreateItem() {
+    public void showCreateChannel() {
         if (mStub.isAdded()) {
             if (mCreateItemDialog == null || !mCreateItemDialog.isShowing()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(mStub.getContext());
-                builder.setTitle(R.string.new_item);
-                View body = LayoutInflater.from(mStub.getContext()).inflate(R.layout.layout_create_item, null, false);
+                builder.setTitle(R.string.new_channel);
+                View body = LayoutInflater.from(mStub.getContext()).inflate(R.layout.layout_create_channel, null, false);
                 mItemName = (TextInputEditText) body.findViewById(R.id.input_item_name);
-                mItemDescription = (TextInputEditText) body.findViewById(R.id.input_item_description);
                 builder.setView(body);
                 builder.setPositiveButton(R.string.save, mOnSaveClickListener);
                 builder.setNegativeButton(R.string.cancel, null);
@@ -90,7 +89,7 @@ public class CreateItemView implements CreateItemScreen.View {
         }
     }
 
-    public CreateItemScreen.Presenter getPresenter() {
+    public CreateChannelScreen.Presenter getPresenter() {
         return mPresenter;
     }
 }

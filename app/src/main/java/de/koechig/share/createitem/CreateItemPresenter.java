@@ -7,6 +7,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import de.koechig.share.control.AuthController;
+import de.koechig.share.control.DBController;
 import de.koechig.share.model.Item;
 
 /**
@@ -19,9 +20,11 @@ import de.koechig.share.model.Item;
 public class CreateItemPresenter implements CreateItemScreen.Presenter {
     private CreateItemScreen.View mView;
     private AuthController mAuth;
+    private DBController mDb;
 
-    public CreateItemPresenter(AuthController auth) {
+    public CreateItemPresenter(AuthController auth, DBController db) {
         this.mAuth = auth;
+        this.mDb = db;
     }
 
     @Override

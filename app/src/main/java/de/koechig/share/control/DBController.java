@@ -120,12 +120,7 @@ public class DBController {
         });
     }
 
-    public void createChannel(final String name, final List<User> members, final ActionCallback callback) {
-        final List<String> memberNames = new ArrayList<String>() {{
-            for (User member : members) {
-                add(member.getKey());
-            }
-        }};
+    public void createChannel(final String name, final List<String> memberNames, final ActionCallback callback) {
         final Channel channel = new Channel(name, memberNames);
         mDatabase.child(CHANNELS_NODE).child(channel.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -141,7 +136,7 @@ public class DBController {
                     Map<String, Object> update = new HashMap<>();
                     update.put(CHANNELS_NODE + "/" + channel.getKey(), channel);
                     for (String memberName : memberNames) {
-                        update.put(MEMBERS_NODE + "/" + channel.getKey(), memberName);
+                        update.put(MEMBERS_NODE + "/" + channel.getKey() + "/" + memberName, true);
                     }
                     mDatabase.updateChildren(update, new DatabaseReference.CompletionListener() {
                         @Override

@@ -24,7 +24,7 @@ import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
-import de.koechig.share.createitem.CreateItemView;
+import de.koechig.share.createchannel.createitem.CreateChannelView;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
 import de.koechig.share.util.ColorHelper;
@@ -42,8 +42,8 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
     private View.OnClickListener mOnFabClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (mCreateItemView != null) {
-                mCreateItemView.getPresenter().onAddNewItem();
+            if (mCreateChannelView != null) {
+                mCreateChannelView.getPresenter().onAddNewChannel();
             }
         }
     };
@@ -58,7 +58,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
     private TextView mUserMailText;
     private MenuItem mLoginLogoutView;
     private FloatingActionButton mFAB;
-    private CreateItemView mCreateItemView;
+    private CreateChannelView mCreateChannelView;
     //</editor-fold>
 
     //<editor-fold desc="# Lifecycle #">
@@ -89,20 +89,20 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
             }
         };
         mPresenter = new HomePresenter(auth, db, provider);
-        mCreateItemView = new CreateItemView(this);
-        mCreateItemView.onCreate();
+        mCreateChannelView = new CreateChannelView(this);
+        mCreateChannelView.onCreate();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mPresenter.bindView(this);
-        mCreateItemView.onResume();
+        mCreateChannelView.onResume();
     }
 
     @Override
     public void onStop() {
-        mCreateItemView.onStop();
+        mCreateChannelView.onStop();
         mPresenter.unbindView();
         super.onStop();
     }
@@ -157,7 +157,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
 
     @Override
     public void onDestroy() {
-        mCreateItemView.onDestroy();
+        mCreateChannelView.onDestroy();
         super.onDestroy();
     }
 
