@@ -1,6 +1,8 @@
 package de.koechig.share.model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Mumpi_000 on 07.06.2017.
@@ -10,7 +12,7 @@ public class User extends DB_Item {
     private String firstName;
     private String lastName;
     private String email;
-    private List<String> channels;
+    private Map<String, Boolean> channels;
 
     public User() {
     }
@@ -18,6 +20,10 @@ public class User extends DB_Item {
     public User(String email, String key) {
         this.email = email;
         this.key = key;
+    }
+
+    public Map<String, Boolean> getChannels() {
+        return channels;
     }
 
     public String getFirstName() {
@@ -28,8 +34,12 @@ public class User extends DB_Item {
         return lastName;
     }
 
-    public List<String> getChannels() {
-        return channels;
+    public List<String> getChannelList() {
+        List<String> arr = new ArrayList<>();
+        for (String channel : channels.keySet()) {
+            arr.add(channel);
+        }
+        return arr;
     }
 
     public String getEmail() {
@@ -48,7 +58,12 @@ public class User extends DB_Item {
 
                         && ((this.email == null && user.email == null) || (this.email != null && this.email.equals(user.email)))
 
-                        && ((this.channels == null && user.channels == null) || (this.channels != null && this.channels.containsAll(user.channels) && user.channels != null && user.channels.containsAll(this.channels)))
+                        && (
+                        (this.channels == null && user.channels == null)
+                                || ((this.channels != null && user.channels != null)
+                                && this.channels.keySet().containsAll(user.channels.keySet())
+                                && user.channels.keySet().containsAll(this.channels.keySet()))
+                )
 
                         && ((this.firstName == null && user.firstName == null) || (this.firstName != null && this.firstName.equals(user.firstName)))
 

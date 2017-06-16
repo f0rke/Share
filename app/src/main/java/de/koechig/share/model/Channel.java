@@ -31,7 +31,7 @@ public class Channel extends DB_Item {
         }
     }
 
-    public List<String> getMemberList() {
+    public List<String> retrieveMemberList() {
         List<String> arr = new ArrayList<>();
         for (String member : members.keySet()) {
             arr.add(member);

@@ -129,14 +129,12 @@ public class DBController {
                     String message = String.format(mProvider.getEntryAlreadyExistingMessage(), name);
                     callback.onFailed(new EntryAlreadyExistsException(message));
                 } else {
-                    //Start transaction
-                    //create channel
-                    //link users to channel
-
+                    //Start transaction, create channel, link users to channel
                     Map<String, Object> update = new HashMap<>();
                     update.put(CHANNELS_NODE + "/" + channel.getKey(), channel);
                     for (String memberName : memberNames) {
                         update.put(MEMBERS_NODE + "/" + channel.getKey() + "/" + memberName, true);
+                        update.put(USERS_NODE + "/" + memberName + "/channels/" + channel.getKey(), true);
                     }
                     mDatabase.updateChildren(update, new DatabaseReference.CompletionListener() {
                         @Override
