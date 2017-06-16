@@ -25,6 +25,19 @@ public class StringHelper {
         }
     }
 
+    public String convertToId(String candidate) {
+        String id = null;
+        if (candidate != null && !candidate.isEmpty()) {
+            id = removeUnallowedFirebaseKeyChars(candidate);
+            if (!id.isEmpty()) {
+                id = id.toLowerCase();
+            } else {
+                id = null;
+            }
+        }
+        return id;
+    }
+
     private String getMailPrefix(String mail) {
         return isMail(mail) ? mail.split("@")[0] : null;
     }

@@ -10,7 +10,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.koechig.share.model.Channel;
 import de.koechig.share.model.Item;
@@ -28,15 +30,17 @@ public class DBController {
 
     private DatabaseReference mDatabase;
     private StringHelper mStringHelper;
+    private final DatabaseStringsProvider mProvider;
 
     private static final String USERS_NODE = "users";
     private static final String MEMBERS_NODE = "members";
     private static final String CHANNELS_NODE = "channels";
     private static final String ITEMS_NODE = "items";
 
-    public DBController(DatabaseReference mDatabase, StringHelper stringHelper) {
+    public DBController(DatabaseReference mDatabase, StringHelper stringHelper, DatabaseStringsProvider provider) {
         this.mDatabase = mDatabase;
         this.mStringHelper = stringHelper;
+        this.mProvider = provider;
     }
 
     //<editor-fold desc="# Users #">
@@ -75,6 +79,7 @@ public class DBController {
             if (last != null) {
                 user.setLastName(last);
             }
+            //TODO check if user already exists
             mDatabase.child(USERS_NODE).child(key).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -115,7 +120,50 @@ public class DBController {
         });
     }
 
-    public void createChannel() {
+    public void createChannel(final String name, final List<User> members, final ActionCallback callback) {
+        final List<String> memberNames = new ArrayList<String>() {{
+            for (User member : members) {
+                add(member.getKey());
+            }
+        }};
+        final Channel channel = new Channel(name, memberNames);
+        mDatabase.child(CHANNELS_NODE).child(channel.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    String message = String.format(mProvider.getEntryAlreadyExistingMessage(), name);
+                    callback.onFailed(new EntryAlreadyExistsException(message));
+                } else {
+                    //Start transaction
+                    //create channel
+                    //link users to channel
+
+                    Map<String, Object> update = new HashMap<>();
+                    update.put(CHANNELS_NODE + "/" + channel.getKey(), channel);
+                    for (String memberName : memberNames) {
+                        update.put(MEMBERS_NODE + "/" + channel.getKey(), memberName);
+                    }
+                    mDatabase.updateChildren(update, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError != null) {
+                                callback.onFailed(databaseError.toException());
+                            } else {
+                                callback.onSucceeded();
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onFailed(databaseError.toException());
+            }
+        });
+    }
+
+    public void subscribeToChannel(Channel channel, User newMember) {
 
     }
 
@@ -124,12 +172,28 @@ public class DBController {
     }
     //</editor-fold>
 
-
     //<editor-fold desc="# Inner classes #">
     public interface RetrieveCallback<T> {
         void onSuccess(T result);
 
         void onError(Exception e);
+    }
+
+    public interface ActionCallback {
+        void onSucceeded();
+
+        void onFailed(Exception e);
+    }
+
+    public class EntryAlreadyExistsException extends Exception {
+
+        public EntryAlreadyExistsException(String message) {
+            super(message);
+        }
+    }
+
+    public interface DatabaseStringsProvider {
+        String getEntryAlreadyExistingMessage();
     }
     //</editor-fold>
 }

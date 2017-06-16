@@ -1,18 +1,11 @@
 package de.koechig.share.home;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 import java.util.List;
 
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
 import de.koechig.share.home.HomeScreen.View;
 import de.koechig.share.model.Channel;
-import de.koechig.share.model.Item;
 import de.koechig.share.model.User;
 
 /**
@@ -57,52 +50,6 @@ public class HomePresenter implements HomeScreen.Presenter {
         if (mView != null) {
             mView.showLoginSuccessfulMessage();
         }
-    }
-
-    @Override
-    public void onAddNewItem() {
-        if (mView != null) {
-            mView.showCreateItem();
-        }
-    }
-
-    @Override
-    public void onSaveClicked(final String name, String description) {
-        final Item item = new Item(name, description, mAuth.getCurrentUser());
-        if (mView != null) {
-            mView.showProgress();
-        }
-        final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("items");
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChild(name)) {
-                    //exists
-                    //TODO: Notify duplicate error
-                    if (mView != null) {
-                        mView.hideProgress();
-                    }
-                } else {
-                    ref.child(item.getName()).setValue(item, new DatabaseReference.CompletionListener() {
-                        @Override
-                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                            //TODO handle
-                            if(mView!=null){
-                                mView.hideProgress();
-                            }
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                //TODO
-                if (mView != null) {
-                    mView.hideProgress();
-                }
-            }
-        });
     }
 
     @Override

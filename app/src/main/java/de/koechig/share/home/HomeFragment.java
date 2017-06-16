@@ -1,6 +1,5 @@
 package de.koechig.share.home;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,12 +7,10 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +24,7 @@ import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
+import de.koechig.share.createitem.CreateItemView;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
 import de.koechig.share.util.ColorHelper;
@@ -44,20 +42,12 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
     private View.OnClickListener mOnFabClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mPresenter.onAddNewItem();
-        }
-    };
-    private DialogInterface.OnClickListener mOnSaveClickListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            if (mItemName != null) {
-                mPresenter.onSaveClicked(mItemName.getText().toString(), mItemDescription != null ? mItemDescription.getText().toString() : null);
+            if (mCreateItemView != null) {
+                mCreateItemView.getPresenter().onAddNewItem();
             }
         }
     };
-
     private ColorHelper mColorHelper;
-
     //</editor-fold>
 
     //<editor-fold desc="# Views #">
@@ -68,9 +58,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
     private TextView mUserMailText;
     private MenuItem mLoginLogoutView;
     private FloatingActionButton mFAB;
-    private AlertDialog mCreateItemDialog;
-    private TextInputEditText mItemName;
-    private TextInputEditText mItemDescription;
+    private CreateItemView mCreateItemView;
     //</editor-fold>
 
     //<editor-fold desc="# Lifecycle #">
@@ -101,16 +89,20 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
             }
         };
         mPresenter = new HomePresenter(auth, db, provider);
+        mCreateItemView = new CreateItemView(this);
+        mCreateItemView.onCreate();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mPresenter.bindView(this);
+        mCreateItemView.onResume();
     }
 
     @Override
     public void onStop() {
+        mCreateItemView.onStop();
         mPresenter.unbindView();
         super.onStop();
     }
@@ -165,10 +157,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
 
     @Override
     public void onDestroy() {
-        if (mCreateItemDialog != null) {
-            mCreateItemDialog.dismiss();
-            mCreateItemDialog = null;
-        }
+        mCreateItemView.onDestroy();
         super.onDestroy();
     }
 
@@ -228,32 +217,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
     //</editor-fold>
 
     //<editor-fold desc="# Open other screens #">
-    @Override
-    public void showCreateItem() {
-        if (isAdded()) {
-            if (mCreateItemDialog == null || !mCreateItemDialog.isShowing()) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(R.string.new_item);
-                View body = LayoutInflater.from(getContext()).inflate(R.layout.layout_create_item, null, false);
-                mItemName = (TextInputEditText) body.findViewById(R.id.input_item_name);
-                mItemDescription = (TextInputEditText) body.findViewById(R.id.input_item_description);
-                builder.setView(body);
-                builder.setPositiveButton(R.string.save, mOnSaveClickListener);
-                builder.setNegativeButton(R.string.cancel, null);
-                mCreateItemDialog = builder.show();
-            }
-        }
-    }
 
-    @Override
-    public void showProgress() {
-        //TODO
-    }
-
-    @Override
-    public void hideProgress() {
-        //TODO
-    }
 
     @Override
     public void showLoginScreen() {

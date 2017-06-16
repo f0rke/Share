@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="entry_already_exists">"A Channel with the name '$s' already exists"</string>
+</resources>

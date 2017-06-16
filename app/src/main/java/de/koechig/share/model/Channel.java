@@ -2,6 +2,8 @@ package de.koechig.share.model;
 
 import java.util.List;
 
+import de.koechig.share.util.StringHelper;
+
 /**
  * Created by Mumpi_000 on 08.06.2017.
  */
@@ -14,6 +16,13 @@ public class Channel extends DB_Item {
     private String name;
 
     public Channel() {
+    }
+
+    public Channel(String name, List<String> members) {
+        StringHelper helper = new StringHelper();
+        this.key = helper.convertToId(name);
+        this.name = name;
+        this.members = members;
     }
 
     public List<String> getMembers() {
