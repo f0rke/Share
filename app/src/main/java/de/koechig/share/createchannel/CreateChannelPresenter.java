@@ -1,4 +1,4 @@
-package de.koechig.share.createchannel.createitem;
+package de.koechig.share.createchannel;
 
 import java.util.List;
 

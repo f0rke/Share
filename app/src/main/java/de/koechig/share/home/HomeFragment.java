@@ -24,7 +24,7 @@ import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
-import de.koechig.share.createchannel.createitem.CreateChannelView;
+import de.koechig.share.createchannel.CreateChannelView;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
 import de.koechig.share.util.ColorHelper;
