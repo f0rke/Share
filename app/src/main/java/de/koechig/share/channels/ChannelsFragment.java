@@ -1,4 +1,4 @@
-package de.koechig.share.home;
+package de.koechig.share.channels;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -13,6 +13,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -20,13 +22,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.koechig.share.R;
+import de.koechig.share.base.OnItemClickListener;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.createchannel.CreateChannelView;
+import de.koechig.share.items.ItemsActivity;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
+import de.koechig.share.model.Channel;
 import de.koechig.share.util.ColorHelper;
 
 import static android.support.v4.view.GravityCompat.START;
@@ -35,10 +43,10 @@ import static android.support.v4.view.GravityCompat.START;
  * Created by Mumpi_000 on 07.06.2017.
  */
 
-public class HomeFragment extends Fragment implements HomeScreen.View {
+public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
 
     //<editor-fold desc="# Objects #">
-    private HomeScreen.Presenter mPresenter;
+    private ChannelsScreen.Presenter mPresenter;
     private View.OnClickListener mOnFabClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -47,23 +55,30 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
             }
         }
     };
+    private OnItemClickListener<Channel> mOnItemClickListener = new OnItemClickListener<Channel>() {
+        @Override
+        public void onItemClick(Channel item) {
+            mPresenter.onChannelClicked(item);
+        }
+    };
     private ColorHelper mColorHelper;
+    private ChannelsAdapter mAdapter;
     //</editor-fold>
 
     //<editor-fold desc="# Views #">
     private DrawerLayout mDrawer;
-
     private AppCompatImageView mHeaderIcon;
     private TextView mUsernameText;
     private TextView mUserMailText;
     private MenuItem mLoginLogoutView;
     private FloatingActionButton mFAB;
     private CreateChannelView mCreateChannelView;
+    private RecyclerView mRecyclerView;
     //</editor-fold>
 
     //<editor-fold desc="# Lifecycle #">
-    public static HomeFragment newInstance() {
-        return new HomeFragment();
+    public static ChannelsFragment newInstance() {
+        return new ChannelsFragment();
     }
 
     @Override
@@ -72,7 +87,7 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         mColorHelper = new ColorHelper(getContext());
         AuthController auth = ShareApp.getInstance().getAuthController();
         DBController db = ShareApp.getInstance().getDb();
-        HomePresenter.HomeResourceProvider provider = new HomePresenter.HomeResourceProvider() {
+        ChannelsPresenter.HomeResourceProvider provider = new ChannelsPresenter.HomeResourceProvider() {
             @Override
             public String getNoUserMailErrorString() {
                 return getString(R.string.no_user_mail_available);
@@ -88,9 +103,10 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
                 return getString(R.string.not_logged_in_user_mail);
             }
         };
-        mPresenter = new HomePresenter(auth, db, provider);
+        mPresenter = new ChannelsPresenter(auth, db, provider);
         mCreateChannelView = new CreateChannelView(this);
         mCreateChannelView.onCreate();
+        mAdapter = new ChannelsAdapter(new ArrayList<Channel>(0), mOnItemClickListener);
     }
 
     @Override
@@ -151,7 +167,12 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
+        View root = inflater.inflate(R.layout.fragment_channels, container, false);
+
+        mRecyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        mRecyclerView.setAdapter(mAdapter);
+
         return root;
     }
 
@@ -160,7 +181,6 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         mCreateChannelView.onDestroy();
         super.onDestroy();
     }
-
     //</editor-fold>
 
     //<editor-fold desc="# Side menu #">
@@ -243,6 +263,21 @@ public class HomeFragment extends Fragment implements HomeScreen.View {
         if (isAdded() && getView() != null) {
             Snackbar.make(getView(), R.string.successfully_logged_in, Snackbar.LENGTH_LONG).show();
         }
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="# View #">
+    @Override
+    public void showChannels(List<Channel> result) {
+        if (isAdded()) {
+            mAdapter.replaceList(result);
+        }
+    }
+
+    @Override
+    public void showItemsScreen(Channel channel) {
+        Intent intent = ItemsActivity.getStartIntent(getContext(), channel.getName());
+        startActivity(intent);
     }
     //</editor-fold>
 }

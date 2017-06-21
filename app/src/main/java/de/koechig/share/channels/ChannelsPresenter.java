@@ -1,10 +1,10 @@
-package de.koechig.share.home;
+package de.koechig.share.channels;
 
 import java.util.List;
 
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
-import de.koechig.share.home.HomeScreen.View;
+import de.koechig.share.channels.ChannelsScreen.View;
 import de.koechig.share.model.Channel;
 import de.koechig.share.model.User;
 
@@ -12,7 +12,7 @@ import de.koechig.share.model.User;
  * Created by Mumpi_000 on 07.06.2017.
  */
 
-public class HomePresenter implements HomeScreen.Presenter {
+public class ChannelsPresenter implements ChannelsScreen.Presenter {
 
     //Member variables
     private View mView;
@@ -26,7 +26,7 @@ public class HomePresenter implements HomeScreen.Presenter {
     };
     private HomeResourceProvider mProvider;
 
-    public HomePresenter(AuthController auth, DBController db, HomeResourceProvider provider) {
+    public ChannelsPresenter(AuthController auth, DBController db, HomeResourceProvider provider) {
         mAuth = auth;
         mDb = db;
         mProvider = provider;
@@ -49,6 +49,13 @@ public class HomePresenter implements HomeScreen.Presenter {
     public void onLoggedIn() {
         if (mView != null) {
             mView.showLoginSuccessfulMessage();
+        }
+    }
+
+    @Override
+    public void onChannelClicked(Channel item) {
+        if(mView!=null){
+            mView.showItemsScreen(item);
         }
     }
 
@@ -80,7 +87,7 @@ public class HomePresenter implements HomeScreen.Presenter {
         mDb.fetchChannels(new DBController.RetrieveCallback<List<Channel>>() {
             @Override
             public void onSuccess(List<Channel> result) {
-
+                mView.showChannels(result);
             }
 
             @Override

@@ -8,7 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.ShareApp;
-import de.koechig.share.home.HomeActivity;
+import de.koechig.share.channels.ChannelsActivity;
 import de.koechig.share.login.LoginActivity;
 import de.koechig.share.login.LoginScreen;
 
@@ -45,7 +45,7 @@ public class LaunchActivity extends AppCompatActivity implements LaunchScreen.Vi
 
     @Override
     public void showHomeScreen() {
-        Intent intent = HomeActivity.getStartIntent(this);
+        Intent intent = ChannelsActivity.getStartIntent(this);
         startActivity(intent);
         finish();
     }

@@ -1,4 +1,4 @@
-package de.koechig.share.home;
+package de.koechig.share.channels;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,22 +11,22 @@ import android.support.v7.widget.Toolbar;
 
 import de.koechig.share.R;
 
-public class HomeActivity extends AppCompatActivity {
+public class ChannelsActivity extends AppCompatActivity {
 
     //Yet obsolete because of LAUNCHER
     public static Intent getStartIntent(Context context){
-        return new Intent(context, HomeActivity.class);
+        return new Intent(context, ChannelsActivity.class);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_channels);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         if (savedInstanceState == null) {
-            initFragment(HomeFragment.newInstance());
+            initFragment(ChannelsFragment.newInstance());
         }
     }
 

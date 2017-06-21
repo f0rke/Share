@@ -17,10 +17,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".home.HomeActivity" />
+        <activity android:name=".channels.ChannelsActivity" />
         <activity
             android:name=".login.LoginActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity android:name=".items.ItemsActivity" />
 
         <service android:name=".control.MessageListener" />
     </application>
