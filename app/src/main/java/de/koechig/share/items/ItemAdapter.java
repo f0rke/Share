@@ -1,32 +1,31 @@
-package de.koechig.share.channels;
+package de.koechig.share.items;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import de.koechig.share.R;
 import de.koechig.share.base.ListAdapter;
 import de.koechig.share.base.ListItem;
-import de.koechig.share.R;
 import de.koechig.share.base.OnItemClickListener;
 import de.koechig.share.model.Channel;
+import de.koechig.share.model.Item;
 
 /**
- * Created by Mumpi_000 on 21.06.2017.
+ * Created by Mumpi_000 on 22.06.2017.
  */
-public class ChannelsAdapter extends ListAdapter<Channel> {
 
-    public ChannelsAdapter(List<Channel> contentItems, OnItemClickListener<Channel> listener) {
-        super(contentItems, listener);
+class ItemAdapter extends ListAdapter<Item> {
+    public ItemAdapter(ArrayList<Item> items, OnItemClickListener<Item> onItemClickListener) {
+        super(items, onItemClickListener);
     }
 
     @Override
     public int getItemViewType(int position) {
-        return R.layout.layout_channel_list_item;
+        return R.layout.layout_item_list_item;
     }
 
     @Override
@@ -37,7 +36,7 @@ public class ChannelsAdapter extends ListAdapter<Channel> {
 
     @Override
     public void onBindViewHolder(ListAdapter.ViewHolder holder, int position) {
-        ListItem<Channel> listItem = mListItems.get(position);
+        ListItem<Item> listItem = mListItems.get(position);
         holder.channelName.setText(listItem.content.getName());
     }
 }

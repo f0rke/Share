@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 
 import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
@@ -24,17 +25,22 @@ public class CreateItemView implements CreateItemScreen.View {
     protected CreateItemScreen.Presenter mPresenter;
     protected android.support.v7.app.AlertDialog mCreateItemDialog;
 
+    private TextView mErrorText;
     private TextInputEditText mItemName;
     private TextInputEditText mItemDescription;
-    private DialogInterface.OnClickListener mOnSaveClickListener = new DialogInterface.OnClickListener() {
+    private View.OnClickListener mOnSaveClickListener = new View.OnClickListener() {
         @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
+        public void onClick(View v) {
             if (mItemName != null) {
                 mPresenter.onSaveClicked(mItemName.getText().toString(), mItemDescription != null ? mItemDescription.getText().toString() : null);
             }
         }
     };
-
+    private DialogInterface.OnClickListener mDoNothingListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+        }
+    };
 
     public CreateItemView(Fragment parent) {
         mStub = parent;
@@ -57,8 +63,7 @@ public class CreateItemView implements CreateItemScreen.View {
 
     public void onDestroy() {
         if (mCreateItemDialog != null) {
-            mCreateItemDialog.dismiss();
-            mCreateItemDialog = null;
+            dismissDialog();
         }
     }
     //</editor-fold>
@@ -74,7 +79,22 @@ public class CreateItemView implements CreateItemScreen.View {
     }
 
     @Override
-    public void showCreateItem() {
+    public void showError(String error) {
+        if (mStub.isAdded() && mErrorText != null) {
+            mErrorText.setVisibility(View.VISIBLE);
+            mErrorText.setText(error);
+        }
+    }
+
+    @Override
+    public void hideError() {
+        if (mStub.isAdded() && mErrorText != null) {
+            mErrorText.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void show() {
         if (mStub.isAdded()) {
             if (mCreateItemDialog == null || !mCreateItemDialog.isShowing()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(mStub.getContext());
@@ -82,12 +102,29 @@ public class CreateItemView implements CreateItemScreen.View {
                 View body = LayoutInflater.from(mStub.getContext()).inflate(R.layout.layout_create_item, null, false);
                 mItemName = (TextInputEditText) body.findViewById(R.id.input_item_name);
                 mItemDescription = (TextInputEditText) body.findViewById(R.id.input_item_description);
+                mErrorText = (TextView) body.findViewById(R.id.error_text);
                 builder.setView(body);
-                builder.setPositiveButton(R.string.save, mOnSaveClickListener);
-                builder.setNegativeButton(R.string.cancel, null);
+                builder.setPositiveButton(R.string.save, mDoNothingListener);
+                builder.setNegativeButton(R.string.cancel, mDoNothingListener);
                 mCreateItemDialog = builder.show();
+                mCreateItemDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(mOnSaveClickListener);
             }
         }
+    }
+
+    @Override
+    public void hide() {
+        if (mCreateItemDialog != null) {
+            dismissDialog();
+        }
+    }
+
+    private void dismissDialog() {
+        mCreateItemDialog.dismiss();
+        mCreateItemDialog = null;
+        mErrorText = null;
+        mItemDescription = null;
+        mItemName = null;
     }
 
     public CreateItemScreen.Presenter getPresenter() {

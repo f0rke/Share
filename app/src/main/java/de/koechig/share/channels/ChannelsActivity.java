@@ -13,7 +13,6 @@ import de.koechig.share.R;
 
 public class ChannelsActivity extends AppCompatActivity {
 
-    //Yet obsolete because of LAUNCHER
     public static Intent getStartIntent(Context context){
         return new Intent(context, ChannelsActivity.class);
     }

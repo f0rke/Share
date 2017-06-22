@@ -18,10 +18,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".channels.ChannelsActivity" />
+        <activity android:name=".items.ItemsActivity" />
         <activity
             android:name=".login.LoginActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
-        <activity android:name=".items.ItemsActivity" />
 
         <service android:name=".control.MessageListener" />
     </application>

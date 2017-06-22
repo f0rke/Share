@@ -126,7 +126,7 @@ public class DBController {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
-                    String message = String.format(mProvider.getEntryAlreadyExistingMessage(), name);
+                    String message = String.format(mProvider.getChannelAlreadyExistingMessage(), name);
                     callback.onFailed(new EntryAlreadyExistsException(message));
                 } else {
                     //Start transaction, create channel, link users to channel
@@ -160,8 +160,84 @@ public class DBController {
 
     }
 
-    public void submitNewItemToChannel(Item item, Channel channel, User creator) {
+    public void fetchChannel(String mChannelKey, final RetrieveCallback<Channel> callback) {
+        mDatabase.child(CHANNELS_NODE).child(mChannelKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                callback.onSuccess(dataSnapshot.getValue(Channel.class));
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError(databaseError.toException());
+            }
+        });
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="# Items #">
+    public void fetchItems(Channel channel, final RetrieveCallback<List<Item>> callback) {
+        mDatabase.child(ITEMS_NODE).child(channel.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                List<Item> items;
+                if (dataSnapshot.getValue() != null) {
+                    items = new ArrayList<Item>() {{
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            Item item = child.getValue(Item.class);
+                            add(item);
+                        }
+                    }};
+                } else {
+                    items = new ArrayList<>(0);
+                }
+                callback.onSuccess(items);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onError(databaseError.toException());
+            }
+        });
+    }
+
+    public void submitNewItemToChannel(
+            @NonNull final Item item,
+            @NonNull final String channelKey,
+            @NonNull final User creator,
+            @NonNull final ActionCallback callback) {
+        mDatabase.child(ITEMS_NODE).child(channelKey).child(item.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    String message = String.format(mProvider.getItemAlreadyExistingMessage(), item.getName());
+                    callback.onFailed(new EntryAlreadyExistsException(message));
+                } else {
+                    //Start transaction, create channel, link users to channel
+                    Map<String, Object> update = new HashMap<>();
+                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastEntryTimestamp", item.getCreationDate());
+                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastEntry", item.getKey());
+                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastContributor", creator.getKey());
+                    update.put(ITEMS_NODE + "/" + channelKey + "/" + item.getKey(), item);
+                    mDatabase.updateChildren(update, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError != null) {
+                                callback.onFailed(databaseError.toException());
+                            } else {
+                                mDatabase.child(CHANNELS_NODE).child(channelKey).orderByChild("lastEntryTimestamp");
+                                callback.onSucceeded();
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onFailed(databaseError.toException());
+            }
+        });
     }
     //</editor-fold>
 
@@ -186,7 +262,9 @@ public class DBController {
     }
 
     public interface DatabaseStringsProvider {
-        String getEntryAlreadyExistingMessage();
+        String getChannelAlreadyExistingMessage();
+
+        String getItemAlreadyExistingMessage();
     }
     //</editor-fold>
 }

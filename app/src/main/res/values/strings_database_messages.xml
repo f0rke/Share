@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="entry_already_exists">"A Channel with the name '$s' already exists"</string>
+    <string name="channel_already_exists">"A Channel with the name '%1$s' already exists"</string>
+    <string name="item_already_exists">"An Item with the name '%1$s' already exists"</string>
 </resources>

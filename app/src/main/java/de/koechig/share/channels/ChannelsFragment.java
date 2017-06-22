@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.koechig.share.R;
+import de.koechig.share.base.ListAdapter;
 import de.koechig.share.base.OnItemClickListener;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
@@ -62,7 +63,7 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
         }
     };
     private ColorHelper mColorHelper;
-    private ChannelsAdapter mAdapter;
+    private ListAdapter<Channel> mAdapter;
     //</editor-fold>
 
     //<editor-fold desc="# Views #">
@@ -276,7 +277,7 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
 
     @Override
     public void showItemsScreen(Channel channel) {
-        Intent intent = ItemsActivity.getStartIntent(getContext(), channel.getName());
+        Intent intent = ItemsActivity.getStartIntent(getContext(), channel.getKey());
         startActivity(intent);
     }
     //</editor-fold>

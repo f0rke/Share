@@ -1,13 +1,8 @@
 package de.koechig.share.createitem;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
+import de.koechig.share.model.Channel;
 import de.koechig.share.model.Item;
 
 /**
@@ -18,9 +13,11 @@ import de.koechig.share.model.Item;
  */
 
 public class CreateItemPresenter implements CreateItemScreen.Presenter {
+
     private CreateItemScreen.View mView;
     private AuthController mAuth;
     private DBController mDb;
+    private String mChannelKey;
 
     public CreateItemPresenter(AuthController auth, DBController db) {
         this.mAuth = auth;
@@ -44,48 +41,44 @@ public class CreateItemPresenter implements CreateItemScreen.Presenter {
     }
 
     @Override
-    public void onAddNewItem() {
+    public void onAddNewItem(String key) {
+        mChannelKey = key;
         if (mView != null) {
-            mView.showCreateItem();
+            mView.show();
         }
     }
 
     @Override
     public void onSaveClicked(final String name, String description) {
-        final Item item = new Item(name, description, mAuth.getCurrentUser());
-        if (mView != null) {
-            mView.showProgress();
-        }
-        final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("items");
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChild(name)) {
-                    //exists
-                    //TODO: Notify duplicate error
-                    if (mView != null) {
-                        mView.hideProgress();
-                    }
-                } else {
-                    ref.child(item.getName()).setValue(item, new DatabaseReference.CompletionListener() {
-                        @Override
-                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                            //TODO handle
-                            if (mView != null) {
-                                mView.hideProgress();
-                            }
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                //TODO
+        if (name != null && !name.isEmpty()) {
+            final Item item = new Item(name, description != null && !description.isEmpty() ? description : null, mAuth.getCurrentUser());
+            if (mChannelKey != null && mAuth.getCurrentUser() != null) {
                 if (mView != null) {
-                    mView.hideProgress();
+                    mView.showProgress();
                 }
+                mDb.submitNewItemToChannel(item, mChannelKey, mAuth.getCurrentUser(), new DBController.ActionCallback() {
+                    @Override
+                    public void onSucceeded() {
+                        if (mView != null) {
+                            mView.hideProgress();
+                            mView.hideError();
+                            mView.hide();
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(Exception e) {
+                        if (mView != null) {
+                            mView.hideProgress();
+                            mView.showError(e.getMessage());
+                        }
+                    }
+                });
             }
-        });
+        } else {
+            if (mView != null) {
+                mView.showError("No name given");
+            }
+        }
     }
 }
