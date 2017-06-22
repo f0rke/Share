@@ -225,7 +225,7 @@ public class DBController {
                             if (databaseError != null) {
                                 callback.onFailed(databaseError.toException());
                             } else {
-                                mDatabase.child(CHANNELS_NODE).child(channelKey).orderByChild("lastEntryTimestamp");
+//                                mDatabase.child(ITEMS_NODE).child(channelKey).orderByChild("creationDate");
                                 callback.onSucceeded();
                             }
                         }
