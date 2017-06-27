@@ -17,16 +17,16 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
     //Member variables
     private View mView;
     private final AuthController mAuth;
-    private DBController mDb;
-    private AuthController.UserListener mUserListener = new AuthController.UserListener() {
+    private final DBController mDb;
+    private final AuthController.UserListener mUserListener = new AuthController.UserListener() {
         @Override
         public void onUpdated() {
             updateSideMenu();
         }
     };
-    private HomeResourceProvider mProvider;
+    private final ResourceProvider mProvider;
 
-    public ChannelsPresenter(AuthController auth, DBController db, HomeResourceProvider provider) {
+    public ChannelsPresenter(AuthController auth, DBController db, ResourceProvider provider) {
         mAuth = auth;
         mDb = db;
         mProvider = provider;
@@ -54,7 +54,7 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
 
     @Override
     public void onChannelClicked(Channel item) {
-        if(mView!=null){
+        if (mView != null) {
             mView.showItemsScreen(item);
         }
     }
@@ -123,7 +123,7 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         mView = null;
     }
 
-    interface HomeResourceProvider {
+    public interface ResourceProvider {
         String getNoUserMailErrorString();
 
         String getNotLoggedInUsername();

@@ -22,14 +22,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import de.koechig.share.R;
 import de.koechig.share.base.ListAdapter;
 import de.koechig.share.base.OnItemClickListener;
-import de.koechig.share.control.AuthController;
-import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.createchannel.CreateChannelView;
 import de.koechig.share.items.ItemsActivity;
@@ -47,7 +46,8 @@ import static android.support.v4.view.GravityCompat.START;
 public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
 
     //<editor-fold desc="# Objects #">
-    private ChannelsScreen.Presenter mPresenter;
+    @Inject
+    public ChannelsScreen.Presenter mPresenter;
     private View.OnClickListener mOnFabClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -62,8 +62,10 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
             mPresenter.onChannelClicked(item);
         }
     };
-    private ColorHelper mColorHelper;
-    private ListAdapter<Channel> mAdapter;
+    @Inject
+    public ListAdapter<Channel> mAdapter;
+    @Inject
+    public ColorHelper mColorHelper;
     //</editor-fold>
 
     //<editor-fold desc="# Views #">
@@ -73,7 +75,8 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
     private TextView mUserMailText;
     private MenuItem mLoginLogoutView;
     private FloatingActionButton mFAB;
-    private CreateChannelView mCreateChannelView;
+    @Inject
+    public CreateChannelView mCreateChannelView;
     private RecyclerView mRecyclerView;
     //</editor-fold>
 
@@ -85,29 +88,10 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mColorHelper = new ColorHelper(getContext());
-        AuthController auth = ShareApp.getInstance().getAuthController();
-        DBController db = ShareApp.getInstance().getDb();
-        ChannelsPresenter.HomeResourceProvider provider = new ChannelsPresenter.HomeResourceProvider() {
-            @Override
-            public String getNoUserMailErrorString() {
-                return getString(R.string.no_user_mail_available);
-            }
-
-            @Override
-            public String getNotLoggedInUsername() {
-                return getString(R.string.not_logged_in_username);
-            }
-
-            @Override
-            public String getNotLoggedInUserMail() {
-                return getString(R.string.not_logged_in_user_mail);
-            }
-        };
-        mPresenter = new ChannelsPresenter(auth, db, provider);
-        mCreateChannelView = new CreateChannelView(this);
+        ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
+                .newChannelsSubComponent(new ChannelsModule(this, mOnItemClickListener))
+                .inject(this);
         mCreateChannelView.onCreate();
-        mAdapter = new ChannelsAdapter(new ArrayList<Channel>(0), mOnItemClickListener);
     }
 
     @Override

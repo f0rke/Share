@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
@@ -22,7 +24,8 @@ import de.koechig.share.control.ShareApp;
 
 public class CreateItemView implements CreateItemScreen.View {
     protected final Fragment mStub;
-    protected CreateItemScreen.Presenter mPresenter;
+    @Inject
+    public CreateItemScreen.Presenter mPresenter;
     protected android.support.v7.app.AlertDialog mCreateItemDialog;
 
     private TextView mErrorText;
@@ -48,9 +51,9 @@ public class CreateItemView implements CreateItemScreen.View {
 
     //<editor-fold desc="# Lifecycle #">
     public void onCreate() {
-        AuthController auth = ShareApp.getInstance().getAuthController();
-        DBController db = ShareApp.getInstance().getDb();
-        mPresenter = new CreateItemPresenter(auth, db);
+        ((ShareApp) mStub.getContext().getApplicationContext()).getApplicationComponent()
+                .newCreateChannelSubComponent(new CreateItemModule())
+                .inject(this);
     }
 
     public void onResume() {

@@ -2,45 +2,37 @@ package de.koechig.share.control;
 
 import android.app.Application;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 
-import java.lang.ref.WeakReference;
+import de.koechig.share.dagger.AppComponent;
+import de.koechig.share.dagger.AppModule;
+import de.koechig.share.dagger.AuthModule;
+import de.koechig.share.dagger.DaggerAppComponent;
+import de.koechig.share.dagger.DatabaseModule;
+import de.koechig.share.dagger.HelperModule;
 
-import de.koechig.share.model.MyDatabaseStringsProvider;
-import de.koechig.share.util.StringHelper;
 
 /**
  * Created by Mumpi_000 on 06.06.2017.
  */
 
 public class ShareApp extends Application {
-    private static WeakReference<ShareApp> ourInstance;
-    private AuthController mAuthController;
-    private DBController mDB;
-
-    public static ShareApp getInstance() {
-        return ourInstance.get();
-    }
+    private AppComponent mApplicationComponent;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (ourInstance == null) {
-            ourInstance = new WeakReference<>(this);
-        }
         FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
-        mDB = new DBController(FirebaseDatabase.getInstance().getReference(), new StringHelper(), new MyDatabaseStringsProvider(this));
-        mAuthController = new AuthController(FirebaseAuth.getInstance(), mDB, new StringHelper());
+        mApplicationComponent = DaggerAppComponent.builder()
+                .appModule(new AppModule(this))
+                .authModule(new AuthModule())
+                .helperModule(new HelperModule())
+                .databaseModule(new DatabaseModule())
+                .build();
     }
 
-    public AuthController getAuthController() {
-        return mAuthController;
+    public AppComponent getApplicationComponent() {
+        return mApplicationComponent;
     }
-
-    public DBController getDb() {
-        return mDB;
-    }
-
 }

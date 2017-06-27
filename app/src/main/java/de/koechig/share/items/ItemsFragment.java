@@ -18,6 +18,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import de.koechig.share.R;
 import de.koechig.share.base.ListAdapter;
 import de.koechig.share.base.OnItemClickListener;
@@ -33,7 +35,8 @@ import de.koechig.share.model.Item;
 
 public class ItemsFragment extends Fragment implements ItemsScreen.View {
     private static final String CHANNEL_IDENTIFIER = "channel";
-    private ItemsScreen.Presenter mPresenter;
+    @Inject
+    public ItemsScreen.Presenter mPresenter;
     private String mChannelKey;
     private SwipeRefreshLayout mSwipeLayout;
     private RecyclerView mRecycler;
@@ -54,7 +57,8 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
             }
         }
     };
-    private CreateItemView mCreateItemView;
+    @Inject
+    public CreateItemView mCreateItemView;
     private SwipeRefreshLayout.OnRefreshListener mOnRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
@@ -74,10 +78,10 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DBController mDb = ShareApp.getInstance().getDb();
         mChannelKey = getArguments().getString(CHANNEL_IDENTIFIER);
-        mPresenter = new ItemsPresenter(mDb, mChannelKey);
-        mCreateItemView = new CreateItemView(this);
+        ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
+                .newItemsSubComponent(new ItemsModule(this, mChannelKey))
+                .inject(this);
         mCreateItemView.onCreate();
         setHasOptionsMenu(true);
     }

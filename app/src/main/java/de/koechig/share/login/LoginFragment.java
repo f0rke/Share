@@ -23,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import de.koechig.share.R;
+import de.koechig.share.channels.ChannelsModule;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.util.StringHelper;
@@ -93,9 +94,9 @@ public class LoginFragment extends Fragment implements LoginScreen.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AuthController auth = ShareApp.getInstance().getAuthController();
-        StringHelper matcher = new StringHelper();
-        mPresenter = new LoginPresenter(matcher, auth);
+        ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
+                .newLoginSubComponent(new LoginModule())
+                .inject(this);
         setHasOptionsMenu(true);
     }
 

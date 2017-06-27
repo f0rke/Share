@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import javax.inject.Inject;
+
 import de.koechig.share.R;
+import de.koechig.share.channels.ChannelsModule;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.channels.ChannelsActivity;
@@ -21,14 +24,16 @@ import de.koechig.share.login.LoginScreen;
 
 public class LaunchActivity extends AppCompatActivity implements LaunchScreen.View {
 
-    private LaunchScreen.Presenter mPresenter;
+    @Inject
+    public LaunchScreen.Presenter mPresenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((ShareApp) getApplicationContext()).getApplicationComponent()
+                .newLaunchSubComponent(new LaunchModule())
+                .inject(this);
         setContentView(R.layout.activity_launch);
-        AuthController auth = ShareApp.getInstance().getAuthController();
-        mPresenter = new LaunchPresenter(auth);
     }
 
     @Override

@@ -9,6 +9,8 @@ import android.view.View;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import de.koechig.share.R;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
@@ -23,7 +25,8 @@ import de.koechig.share.control.ShareApp;
 
 public class CreateChannelView implements CreateChannelScreen.View {
     protected final Fragment mStub;
-    protected CreateChannelScreen.Presenter mPresenter;
+    @Inject
+    public CreateChannelScreen.Presenter mPresenter;
     protected AlertDialog mCreateItemDialog;
 
     private TextInputEditText mItemName;
@@ -31,7 +34,7 @@ public class CreateChannelView implements CreateChannelScreen.View {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
             if (mItemName != null) {
-                mPresenter.onSaveClicked(mItemName.getText().toString(), Arrays.asList("moritzkoechig","stefanbaehr"));
+                mPresenter.onSaveClicked(mItemName.getText().toString(), Arrays.asList("moritzkoechig", "stefanbaehr"));
             }
         }
     };
@@ -42,9 +45,9 @@ public class CreateChannelView implements CreateChannelScreen.View {
 
     //<editor-fold desc="# Lifecycle #">
     public void onCreate() {
-        AuthController auth = ShareApp.getInstance().getAuthController();
-        DBController db = ShareApp.getInstance().getDb();
-        mPresenter = new CreateChannelPresenter(db);
+        ((ShareApp) mStub.getContext().getApplicationContext()).getApplicationComponent()
+                .newCreateChannelSubComponent(new CreateChannelModule())
+                .inject(this);
     }
 
     public void onResume() {

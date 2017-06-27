@@ -20,12 +20,6 @@ import de.koechig.share.util.StringHelper;
 @Module
 public class DatabaseModule {
 
-    private final Context mContext;
-
-    public DatabaseModule(Context c) {
-        this.mContext = c;
-    }
-
     @Provides
     @Singleton
     public DBController provideDatabase(DatabaseReference db, StringHelper helper, DBController.DatabaseStringsProvider provider) {
@@ -40,13 +34,7 @@ public class DatabaseModule {
 
     @Provides
     @Singleton
-    public StringHelper provideStringHelper() {
-        return new StringHelper();
-    }
-
-    @Provides
-    @Singleton
-    public DBController.DatabaseStringsProvider provideStringProvider() {
-        return new MyDatabaseStringsProvider(mContext);
+    public DBController.DatabaseStringsProvider provideStringProvider(Context context) {
+        return new MyDatabaseStringsProvider(context);
     }
 }
