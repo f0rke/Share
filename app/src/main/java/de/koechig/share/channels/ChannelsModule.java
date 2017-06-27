@@ -32,7 +32,6 @@ public class ChannelsModule {
     }
 
     @Provides
-//    @ChannelsScope
     public ResourceProvider provideResourceProvider(final Context context) {
         return new ResourceProvider() {
             @Override
@@ -53,19 +52,16 @@ public class ChannelsModule {
     }
 
     @Provides
-//    @ChannelsScope
     public ChannelsScreen.Presenter providePresenter(AuthController auth, DBController db, ResourceProvider provider) {
         return new ChannelsPresenter(auth, db, provider);
     }
 
     @Provides
-//    @ChannelsScope
     public ListAdapter<Channel> provideAdapter() {
         return new ChannelsAdapter(new ArrayList<Channel>(0), mClickListener);
     }
 
     @Provides
-//    @ChannelsScope
     public CreateChannelView provideCreateChannelView() {
         return new CreateChannelView(mFragment);
     }
