@@ -5,12 +5,7 @@ import android.app.Application;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 
-import de.koechig.share.dagger.AppComponent;
-import de.koechig.share.dagger.AppModule;
-import de.koechig.share.dagger.AuthModule;
-import de.koechig.share.dagger.DaggerAppComponent;
-import de.koechig.share.dagger.DatabaseModule;
-import de.koechig.share.dagger.HelperModule;
+import de.koechig.share.util.HelperModule;
 
 
 /**

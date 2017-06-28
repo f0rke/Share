@@ -1,4 +1,4 @@
-package de.koechig.share.dagger;
+package de.koechig.share.control;
 
 import android.content.Context;
 
