@@ -120,7 +120,10 @@ public class DBController {
         });
     }
 
-    public void createChannel(final String name, final List<String> memberNames, final ActionCallback callback) {
+    public void createChannel(
+            final String name,
+            final List<String> memberNames,
+            final ActionCallback callback) {
         final Channel channel = new Channel(name, memberNames);
         mDatabase.child(CHANNELS_NODE).child(channel.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
