@@ -17,7 +17,7 @@ exports.copyUserToDatabase = functions.auth.user().onCreate(event => {
 
     console.log("uid: " + uid + " - mail: " + mail + " - displayName:" + displayName)
 
-    let updatePromise = admin.auth().updateUser(uid, {
+    let authPromise = admin.auth().updateUser(uid, {
         displayName: displayName
     }).then(userRecord => {
         console.log("Successfully altered user: " + userRecord.toJSON())
@@ -35,46 +35,62 @@ exports.copyUserToDatabase = functions.auth.user().onCreate(event => {
         key: key,
         email: mail
     }
+    let ref = admin.database()
+        .ref('/users')
+    ref.once('value', snap => {
+        var dbPromise
+        if (snap.hasChild(key)) {
+            dbPromise = markUserAsDeleted(key, false)
+        } else {
+            dbPromise = admin.database()
+                .ref('/users/' + key)
+                .set(dbUser).then(snapshot => {
+                    console.log("Successfully created user " + displayName)
+                }).catch(error => {
+                    console.log(error + " - Could not create user" + displayName)
+                })
+        }
 
-    let createPromise = admin.database()
-        .ref('/users/' + key)
-        .set(dbUser).then(snapshot => {
-            console.log("Successfully created user " + displayName)
+        Promise.all([authPromise, dbPromise]).then(snap => {
+            console.log("everything done")
+            return
         }).catch(error => {
-            console.log(error + " - Could not create user" + displayName)
+            console.log(error)
         })
-
-    Promise.all([updatePromise, createPromise]).then(snap => {
-        console.log("everything done")
-        return
-    }).catch(error => {
-        console.log(error)
     })
+})
+
+exports.someHTTTPSFunction = functions.https.onRequest( (req, resp) =>{
+    return resp.send("Hello Max!")
 })
 
 exports.markUserAsDeleted = functions.auth.user().onDelete(event => {
     let user = event.data
     let key = getIdFromMail(user.email.toString())
     if (key) {
-        let ref = admin.database()
-            .ref('/users')
-        ref.once('value', snap => {
-            if (snap.hasChild(key)) {
-                ref.child(key).update({
-                    deleted: true
-                }).then(snap => {
-                    console.log("Successfully marked user " + key + " as deleted")
-                }).catch(error => {
-                    console.log(error + " - Could not mark user" + key + " as deleted")
-                })
-            } else {
-                    console.log("Cannot delete user " + key + " - not existing")
-            }
-        })
+        markUserAsDeleted(key, true)
     }
 })
 
 //Helpers
+function markUserAsDeleted(key, deleted) {
+    let ref = admin.database()
+        .ref('/users')
+    ref.once('value', snap => {
+        if (snap.hasChild(key)) {
+            ref.child(key).update({
+                deleted: deleted
+            }).then(snap => {
+                console.log("Successfully marked user " + key + " deleted:" + deleted)
+            }).catch(error => {
+                console.log(error + " - Could not mark user" + key + " deleted:" + deleted)
+            })
+        } else {
+            console.log("Cannot delete user " + key + " - not existing")
+        }
+    })
+}
+
 function getDisplayNameFromMail(mail) {
     return getFirstNameFromMail(mail) + " " + getLastNameFromMail(mail)
 }
