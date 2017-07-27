@@ -5,6 +5,9 @@ import android.app.Application;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 
+import javax.inject.Inject;
+
+import de.koechig.share.model.User;
 import de.koechig.share.util.HelperModule;
 
 
@@ -14,6 +17,11 @@ import de.koechig.share.util.HelperModule;
 
 public class ShareApp extends Application {
     private AppComponent mApplicationComponent;
+
+    @Inject
+    DBController database;
+    @Inject
+    AuthController auth;
 
     @Override
     public void onCreate() {
@@ -25,9 +33,17 @@ public class ShareApp extends Application {
                 .helperModule(new HelperModule())
                 .databaseModule(new DatabaseModule())
                 .build();
+        mApplicationComponent.inject(this);
     }
 
     public AppComponent getApplicationComponent() {
         return mApplicationComponent;
+    }
+
+    public void sendRegistrationToServer(String refreshedToken) {
+        User onUser = auth.getCurrentUser();
+        if (onUser != null) {
+            database.registerPushToken(refreshedToken, onUser);
+        }
     }
 }

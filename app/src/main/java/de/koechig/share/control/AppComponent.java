@@ -35,4 +35,6 @@ public interface AppComponent {
     LaunchSubComponent newLaunchSubComponent(LaunchModule launchModule);
 
     LoginSubComponent newLoginSubComponent(LoginModule loginModule);
+
+    void inject(ShareApp shareApp);
 }

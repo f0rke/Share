@@ -22,6 +22,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import javax.inject.Inject;
+
 import de.koechig.share.R;
 import de.koechig.share.channels.ChannelsModule;
 import de.koechig.share.control.ShareApp;
@@ -37,7 +39,8 @@ import static android.view.View.VISIBLE;
 
 public class LoginFragment extends Fragment implements LoginScreen.View {
 
-    private LoginScreen.Presenter mPresenter;
+    @Inject
+    public LoginScreen.Presenter mPresenter;
 
     //<editor-fold desc="# Click Listener #">
     private OnClickListener mOnLoginClick = new OnClickListener() {

@@ -2,4 +2,5 @@
 <resources>
     <string name="channel_already_exists">"A Channel with the name '%1$s' already exists"</string>
     <string name="item_already_exists">"An Item with the name '%1$s' already exists"</string>
+    <string name="user_already_exists">"A User with the name '%1$s' already exists"</string>
 </resources>

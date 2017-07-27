@@ -68,7 +68,7 @@ public class DBController {
     }
 
     public void createUser(String mail, final RetrieveCallback<User> callback) {
-        String key = mStringHelper.getIdFromMail(mail);
+        final String key = mStringHelper.getIdFromMail(mail);
         if (key != null) {
             final User user = new User(mail, key);
             String first = mStringHelper.getFirstNameFromMail(mail);
@@ -79,17 +79,35 @@ public class DBController {
             if (last != null) {
                 user.setLastName(last);
             }
-            //TODO check if user already exists
-            mDatabase.child(USERS_NODE).child(key).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        callback.onSuccess(user);
-                    } else {
-                        callback.onError(task.getException());
-                    }
-                }
-            });
+            mDatabase.child(USERS_NODE).child(key).addListenerForSingleValueEvent(
+                    new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                String message = String.format(
+                                        mProvider.getUserAlreadyExistingMessage(),
+                                        key);
+                                callback.onError(new EntryAlreadyExistsException(message));
+                            } else {
+                                mDatabase.child(USERS_NODE).child(key).setValue(user).addOnCompleteListener(
+                                        new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    callback.onSuccess(user);
+                                                } else {
+                                                    callback.onError(task.getException());
+                                                }
+                                            }
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            callback.onError(databaseError.toException());
+                        }
+                    });
         }
     }
     //</editor-fold>
@@ -244,6 +262,27 @@ public class DBController {
     }
     //</editor-fold>
 
+    //<editor-fold desc="# Push #">
+    public void registerPushToken(final String pushToken, final User user) {
+        //Fire and forget
+        mDatabase.child(USERS_NODE).child(user.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    mDatabase.updateChildren(new HashMap<String, Object>() {{
+                        put(USERS_NODE + "/" + user.getKey() + "/currentPushToken", pushToken);
+                    }});
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //ignore
+            }
+        });
+    }
+    //</editor-fold>
+
     //<editor-fold desc="# Inner classes #">
     public interface RetrieveCallback<T> {
         void onSuccess(T result);
@@ -268,6 +307,8 @@ public class DBController {
         String getChannelAlreadyExistingMessage();
 
         String getItemAlreadyExistingMessage();
+
+        String getUserAlreadyExistingMessage();
     }
     //</editor-fold>
 }

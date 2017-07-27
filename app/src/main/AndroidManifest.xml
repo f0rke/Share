@@ -22,7 +22,17 @@
             android:name=".login.LoginActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
-        <service android:name=".control.MessageListener" />
+        <service android:name=".notification.MessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".notification.InstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

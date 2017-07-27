@@ -12,6 +12,7 @@ public class User extends DB_Item {
     private String firstName;
     private String lastName;
     private String email;
+    private boolean deleted;
     private Map<String, Boolean> channels;
 
     public User() {
@@ -76,5 +77,9 @@ public class User extends DB_Item {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 }

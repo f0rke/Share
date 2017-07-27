@@ -12,6 +12,7 @@ import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,10 +73,6 @@ public class AuthController {
         }
     }
 
-    public interface OnFinishListener {
-        void onFinish();
-    }
-
     public void loadUser(final OnFinishListener callback) {
         if (mUser != null) {
             callback.onFinish();
@@ -128,6 +125,7 @@ public class AuthController {
         if (mUser == null) {
             notifyListeners();
         } else {
+            mDB.registerPushToken(FirebaseInstanceId.getInstance().getToken(), mUser);
             mDB.subscribeToUserChanges(mUser.getKey(), mUserValueListener);
         }
     }
@@ -235,6 +233,7 @@ public class AuthController {
         mAuth.signOut();
     }
 
+    //<editor-fold desc="# Inner classes #">
     public interface Callback {
         void onSuccess();
 
@@ -244,4 +243,9 @@ public class AuthController {
     public interface UserListener {
         void onUpdated();
     }
+
+    public interface OnFinishListener {
+        void onFinish();
+    }
+    //</editor-fold>
 }

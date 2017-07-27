@@ -5,6 +5,13 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
+
+
+
+//#########################
+//######### Users #########
+//#########################
+
 exports.copyUserToDatabase = functions.auth.user().onCreate(event => {
     const user = event.data; // The Firebase user.
     const uid = user.uid;
@@ -15,12 +22,12 @@ exports.copyUserToDatabase = functions.auth.user().onCreate(event => {
         displayName = getDisplayNameFromMail(mail)
     }
 
-    console.log("uid: " + uid + " - mail: " + mail + " - displayName:" + displayName)
+    console.log("uid: " + uid + " - mail: " + mail + " - displayName: \"" + displayName + "\"")
 
     let authPromise = admin.auth().updateUser(uid, {
         displayName: displayName
     }).then(userRecord => {
-        console.log("Successfully altered user: " + userRecord.toJSON())
+        console.log("Successfully altered user: \"" + userRecord.displayName + "\"")
     }).catch(error => {
         console.log("Error " + error + " altering user " + user.toJSON())
     })
@@ -35,33 +42,28 @@ exports.copyUserToDatabase = functions.auth.user().onCreate(event => {
         key: key,
         email: mail
     }
-    let ref = admin.database()
+    let dbPromise = admin.database()
         .ref('/users')
-    ref.once('value', snap => {
-        var dbPromise
-        if (snap.hasChild(key)) {
-            dbPromise = markUserAsDeleted(key, false)
-        } else {
-            dbPromise = admin.database()
-                .ref('/users/' + key)
-                .set(dbUser).then(snapshot => {
-                    console.log("Successfully created user " + displayName)
-                }).catch(error => {
-                    console.log(error + " - Could not create user" + displayName)
-                })
-        }
-
-        Promise.all([authPromise, dbPromise]).then(snap => {
-            console.log("everything done")
-            return
-        }).catch(error => {
-            console.log(error)
+        .once('value', snap => {
+            if (snap.hasChild(key)) {
+                return markUserAsDeleted(key, false)
+            } else {
+                return admin.database()
+                    .ref('/users/' + key)
+                    .set(dbUser)
+                    .then(snapshot => {
+                        console.log("Successfully created user \"" + displayName + "\"")
+                    }).catch(error => {
+                        console.log(error + " - Could not create user\"" + displayName + "\"")
+                    })
+            }
         })
-    })
-})
 
-exports.someHTTTPSFunction = functions.https.onRequest( (req, resp) =>{
-    return resp.send("Hello Max!")
+    return Promise.all([authPromise, dbPromise]).then(snap => {
+        console.log("everything done")
+    }).catch(error => {
+        console.log(error)
+    })
 })
 
 exports.markUserAsDeleted = functions.auth.user().onDelete(event => {
@@ -72,16 +74,145 @@ exports.markUserAsDeleted = functions.auth.user().onDelete(event => {
     }
 })
 
-//Helpers
+//########################
+//######## Items #########
+//########################
+
+exports.handleItemsWrite = functions.database
+    .ref('/items/{channelId}/{itemId}')
+    .onWrite(event => {
+        let channelId = event.params.channelId
+        let itemId = event.params.itemId
+        let item = event.data.val()
+
+        let newItem = !event.data.previous.exists()
+        let itemChanged = !newItem && event.data.changed()
+
+        var title
+        if (newItem == true) {
+            title = "New entry"
+        } else {
+            if (itemChanged) {
+                title = "ItemChanged"
+            } else {
+                title = channelId
+            }
+        }
+
+        var msg = item.name
+        if (item.description) {
+            msg = (msg ? msg : item.key) + " - " + item.description
+        }
+
+        console.log("Item '" + itemId + "' written to '" + channelId + "'")
+        return loadUsersFromChannel(channelId)
+            .then(ids => {
+                console.log("Received user IDs: " + ids)
+                let promises = []
+                for (var i = 0; i < ids.length; i++) {
+                    promises.push(getUser(ids[i]))
+                }
+                return Promise.all(promises)
+                    .then(results => {
+
+                        let tokens = []
+                        for (var i = 0; i < results.length; i++) {
+                            const user = results[i]
+                            const pushToken = user.currentPushToken;
+                            if (pushToken) {
+                                tokens.push(pushToken)
+                            }
+                        }
+                        if (tokens.length > 0) {
+                            console.log("Trying to send notification with title '" + title + "' and body '" + msg + "'")
+                            let payload = {
+                                notification: {
+                                    title: title,
+                                    body: msg ? msg : "some body",
+                                    sound: 'default',
+                                    badge: '1'
+                                }
+                            };
+                            return admin.messaging().sendToDevice(tokens, payload);
+                        }
+                    }).catch(err => {
+                        console.log(err)
+                    })
+            })
+    })
+
+function loadUsersFromChannel(channelId) {
+    let ref = admin.database()
+        .ref('/members/' + channelId)
+    let promise = new Promise((resolve, reject) => {
+        ref.once('value', snap => {
+            let data = snap.val()
+            let users = []
+            for (var entry in data) {
+                users.push(entry)
+            }
+            resolve(users)
+        }, err => {
+            reject(err)
+        })
+    })
+    return promise
+}
+
+function getUser(id) {
+    console.log("Fetching user " + id)
+    let ref = admin.database().ref('/users/' + id)
+    let promise = new Promise((resolve, reject) => {
+        ref.once('value', snap => {
+            let user = snap.val()
+            console.log("Fetched user: " + user.firstName + " " + user.lastName)
+            resolve(user)
+        }, err => {
+            reject(err)
+        })
+    })
+    return promise
+}
+
+//###########################
+//######## Channels #########
+//###########################
+
+exports.handleChannelsWrite = functions.database
+    .ref('/channels/{id}')
+    .onWrite(event => {
+        var value = event.data.val()
+        if (value.key) {
+            var channelId = value.key
+            var parent = event.data.ref.parent
+            //Check if this is a new channel with poperly setup properties
+            let channelCreated = !event.data.previous.exists()
+            let channelStateChanged = !channelCreated && event.data.changed()
+            if (channelCreated && !value.members && !value.lastEntry) {
+                console.log(
+                    'Removing ' + channelId + ' due to no members and no items'
+                )
+                return parent.child(channelId).remove()
+            } else if (!channelStateChanged) {
+                console.log('New channel ' + channelId + ' validated and successfully created')
+                console.log('TODO: inform users')
+            }
+        }
+    });
+
+//##########################
+//######## Helpers #########
+//##########################
+
 function markUserAsDeleted(key, deleted) {
     let ref = admin.database()
         .ref('/users')
-    ref.once('value', snap => {
+    return ref.once('value', snap => {
         if (snap.hasChild(key)) {
-            ref.child(key).update({
+            return ref.child(key).update({
                 deleted: deleted
             }).then(snap => {
-                console.log("Successfully marked user " + key + " deleted:" + deleted)
+                console.log("Successfully marked user '" + key + "' deleted:" + deleted)
             }).catch(error => {
                 console.log(error + " - Could not mark user" + key + " deleted:" + deleted)
             })
@@ -92,7 +223,9 @@ function markUserAsDeleted(key, deleted) {
 }
 
 function getDisplayNameFromMail(mail) {
-    return getFirstNameFromMail(mail) + " " + getLastNameFromMail(mail)
+    return getFirstNameFromMail(mail)
+        + " "
+        + getLastNameFromMail(mail)
 }
 
 function getIdFromMail(mail) {
@@ -116,11 +249,6 @@ function convertToId(candidate) {
 
 function getMailPrefix(mail) {
     return mail.split("@")[0];
-}
-
-String.prototype.replaceAll = function (search, replacement) {
-    var target = this;
-    return target.split(search).join(replacement);
 }
 
 function removeUnallowedFirebaseKeyChars(prefix) {
@@ -171,8 +299,6 @@ function getLastNameFromMail(mail) {
         if (arr && arr.length >= 2) {
             let name = arr[arr.length - 1];
             return capitalizeFirstLetter(name);
-        } else {
-            return capitalizeFirstLetter(prefix);
         }
     }
     return null;
@@ -191,21 +317,7 @@ function capitalizeFirstLetter(name) {
     return name;
 }
 
-exports.deleteEmptyChannel = functions.database
-    .ref('/channels/{id}')
-    .onWrite(event => {
-        var value = event.data.val()
-        if (value.key) {
-            var channelId = value.key
-            var parent = event.data.ref.parent
-            if (!value.members && !value.lastEntry) {
-                console.log(
-                    'Removing ' + channelId + ' due to no members and no items'
-                )
-                return parent.child(channelId).remove()
-            } else {
-                console.log('New channel ' + channelId + ' validated and successfully created')
-            }
-        }
-        return
-    });
+String.prototype.replaceAll = function (search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+}

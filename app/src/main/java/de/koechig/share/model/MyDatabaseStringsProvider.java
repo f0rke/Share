@@ -25,4 +25,9 @@ public class MyDatabaseStringsProvider implements DBController.DatabaseStringsPr
     public String getItemAlreadyExistingMessage() {
         return mContext.getString(R.string.item_already_exists);
     }
+
+    @Override
+    public String getUserAlreadyExistingMessage() {
+        return mContext.getString(R.string.user_already_exists);
+    }
 }
