@@ -1,9 +1,11 @@
 package de.koechig.share.control;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.common.collect.Iterables;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import de.koechig.share.model.Channel;
 import de.koechig.share.model.Item;
@@ -67,10 +70,10 @@ public class DBController {
         mDatabase.child(USERS_NODE).child(key).addValueEventListener(listener);
     }
 
-    public void createUser(String mail, final RetrieveCallback<User> callback) {
-        final String key = mStringHelper.getIdFromMail(mail);
-        if (key != null) {
-            final User user = new User(mail, key);
+    public void createUser(final String uid, String mail, final RetrieveCallback<User> callback) {
+//        final String key = mStringHelper.getIdFromMail(mail);
+        if (uid != null && mail != null) {
+            final User user = new User(uid, mail);
             String first = mStringHelper.getFirstNameFromMail(mail);
             if (first != null) {
                 user.setFirstName(first);
@@ -79,17 +82,17 @@ public class DBController {
             if (last != null) {
                 user.setLastName(last);
             }
-            mDatabase.child(USERS_NODE).child(key).addListenerForSingleValueEvent(
+            mDatabase.child(USERS_NODE).child(uid).addListenerForSingleValueEvent(
                     new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             if (dataSnapshot.getValue() != null) {
                                 String message = String.format(
                                         mProvider.getUserAlreadyExistingMessage(),
-                                        key);
+                                        uid);
                                 callback.onError(new EntryAlreadyExistsException(message));
                             } else {
-                                mDatabase.child(USERS_NODE).child(key).setValue(user).addOnCompleteListener(
+                                mDatabase.child(USERS_NODE).child(uid).setValue(user).addOnCompleteListener(
                                         new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
@@ -113,22 +116,55 @@ public class DBController {
     //</editor-fold>
 
     //<editor-fold desc="# Channels #">
-    public void fetchChannels(final RetrieveCallback<List<Channel>> callback) {
-        mDatabase.child(CHANNELS_NODE).addListenerForSingleValueEvent(new ValueEventListener() {
+    public void fetchChannelsForUser(User user, final RetrieveCallback<List<Channel>> callback) {
+        mDatabase.child(USERS_NODE + "/" + user.getUid() + "/" + CHANNELS_NODE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-                List<Channel> channels;
                 if (dataSnapshot.getValue() != null) {
-                    channels = new ArrayList<Channel>() {{
-                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            Channel channel = child.getValue(Channel.class);
-                            add(channel);
+                    new AsyncTask<Object, Object, List<Channel>>() {
+                        final CountDownLatch latch = new CountDownLatch(Iterables.size(dataSnapshot.getChildren()));
+
+                        @Override
+                        protected List<Channel> doInBackground(Object... voids) {
+                            Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+                            final List<Channel> channels = new ArrayList<>();
+                            for (DataSnapshot channelIdData : children) {
+                                String key = channelIdData.getKey();
+                                mDatabase.child(CHANNELS_NODE + "/" + key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(final DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.getValue() != null) {
+                                            Channel channel = dataSnapshot.getValue(Channel.class);
+                                            channels.add(channel);
+                                            latch.countDown();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                        databaseError.toException().printStackTrace();
+                                        latch.countDown();
+                                    }
+                                });
+                            }
+                            try {
+                                latch.await();
+                                return channels;
+                            } catch (InterruptedException e) {
+                                callback.onError(e);
+                                return null;
+                            }
                         }
-                    }};
-                } else {
-                    channels = new ArrayList<>(0);
+
+                        @Override
+                        protected void onPostExecute(List<Channel> channels) {
+                            super.onPostExecute(channels);
+                            if (channels != null) {
+                                callback.onSuccess(channels);
+                            }
+                        }
+                    }.execute();
                 }
-                callback.onSuccess(channels);
             }
 
             @Override
@@ -194,7 +230,7 @@ public class DBController {
             }
         });
     }
-    //</editor-fold>
+//</editor-fold>
 
     //<editor-fold desc="# Items #">
     public void fetchItems(Channel channel, final RetrieveCallback<List<Item>> callback) {
@@ -260,17 +296,17 @@ public class DBController {
             }
         });
     }
-    //</editor-fold>
+//</editor-fold>
 
     //<editor-fold desc="# Push #">
-    public void registerPushToken(final String pushToken, final User user) {
+    public void updateUserEntry(final User user) {
         //Fire and forget
         mDatabase.child(USERS_NODE).child(user.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
                     mDatabase.updateChildren(new HashMap<String, Object>() {{
-                        put(USERS_NODE + "/" + user.getKey() + "/currentPushToken", pushToken);
+                        put(USERS_NODE + "/" + user.getUid(), user);
                     }});
                 }
             }
@@ -281,7 +317,7 @@ public class DBController {
             }
         });
     }
-    //</editor-fold>
+//</editor-fold>
 
     //<editor-fold desc="# Inner classes #">
     public interface RetrieveCallback<T> {
@@ -310,5 +346,5 @@ public class DBController {
 
         String getUserAlreadyExistingMessage();
     }
-    //</editor-fold>
+//</editor-fold>
 }

@@ -5,4 +5,10 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="channel_card_height">80dp</dimen>
     <dimen name="item_card_height">40dp</dimen>
+    <dimen name="medium_icon_size">48dp</dimen>
+    <dimen name="medium_icon_text_size">24sp</dimen>
+    <dimen name="list_item_title_text_size">16sp</dimen>
+    <dimen name="list_item_detail_text_size">12sp</dimen>
+    <dimen name="unread_badge_size">20dp</dimen>
+    <dimen name="unread_badge_text_size">12sp</dimen>
 </resources>

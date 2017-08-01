@@ -1,5 +1,7 @@
 package de.koechig.share.model;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,13 +16,14 @@ public class User extends DB_Item {
     private String email;
     private boolean deleted;
     private Map<String, Boolean> channels;
+    private String currentPushToken;
 
     public User() {
     }
 
-    public User(String email, String key) {
+    public User(String uid, String email) {
+        this.key = uid;
         this.email = email;
-        this.key = key;
     }
 
     public Map<String, Boolean> getChannels() {
@@ -35,6 +38,7 @@ public class User extends DB_Item {
         return lastName;
     }
 
+    @Exclude
     public List<String> getChannelList() {
         List<String> arr = new ArrayList<>();
         for (String channel : channels.keySet()) {
@@ -47,8 +51,8 @@ public class User extends DB_Item {
         return email;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public String getCurrentPushToken() {
+        return currentPushToken;
     }
 
     public boolean equalsAllAttributes(User user) {
@@ -63,8 +67,7 @@ public class User extends DB_Item {
                         (this.channels == null && user.channels == null)
                                 || ((this.channels != null && user.channels != null)
                                 && this.channels.keySet().containsAll(user.channels.keySet())
-                                && user.channels.keySet().containsAll(this.channels.keySet()))
-                )
+                                && user.channels.keySet().containsAll(this.channels.keySet())))
 
                         && ((this.firstName == null && user.firstName == null) || (this.firstName != null && this.firstName.equals(user.firstName)))
 
@@ -81,5 +84,17 @@ public class User extends DB_Item {
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public void setPushToken(String pushToken) {
+        this.currentPushToken = pushToken;
+    }
+
+    public String getUid() {
+        return key;
+    }
+
+    public void setUid(String uid) {
+        this.key = uid;
     }
 }

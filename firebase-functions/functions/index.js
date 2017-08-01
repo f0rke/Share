@@ -78,7 +78,7 @@ exports.markUserAsDeleted = functions.auth.user().onDelete(event => {
 //######## Items #########
 //########################
 
-exports.handleItemsWrite = functions.database
+exports.notifyMembersOfNewPosts = functions.database
     .ref('/items/{channelId}/{itemId}')
     .onWrite(event => {
         let channelId = event.params.channelId

@@ -1,16 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/channel_card_height"
     android:layout_marginTop="8dp"
+    android:backgroundTint="@color/list_item_background"
     android:foreground="?android:attr/selectableItemBackground"
     app:cardUseCompatPadding="true">
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:text="TextView" />
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/channelIcon"
+            android:layout_width="@dimen/medium_icon_size"
+            android:layout_height="@dimen/medium_icon_size"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/shape_circle_solid"
+            android:backgroundTint="@color/md_green_400"
+            android:elevation="2dp"
+            android:foreground="@drawable/shape_light_stroke"
+            android:gravity="center"
+            android:maxEms="2"
+            android:text="D"
+            android:textSize="@dimen/medium_icon_text_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Channel name"
+            android:textSize="@dimen/list_item_title_text_size"
+            android:textStyle="bold"
+            app:layout_constraintLeft_toRightOf="@+id/channelIcon"
+            app:layout_constraintRight_toLeftOf="@+id/lastEntryTimestamp"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lastEntryContributor"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Moritz:"
+            android:textSize="@dimen/list_item_detail_text_size"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/channelIcon"
+            app:layout_constraintRight_toLeftOf="@+id/lastEntry"
+            app:layout_constraintTop_toBottomOf="@+id/name" />
+
+        <TextView
+            android:id="@+id/lastEntry"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Lorem ispum sit dolor amet ad some much longer text, which is very very long. It's so long, it's exceeding the space of it's @string/appbar_scrolling_view_behavior"
+            android:textSize="@dimen/list_item_detail_text_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/lastEntryContributor"
+            app:layout_constraintRight_toLeftOf="@+id/lastEntryTimestamp"
+            app:layout_constraintTop_toBottomOf="@+id/name" />
+
+        <TextView
+            android:id="@+id/unreadEntriesCount"
+            android:layout_width="@dimen/unread_badge_size"
+            android:layout_height="@dimen/unread_badge_size"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/shape_circle_solid"
+            android:backgroundTint="@color/unread_dark_background"
+            android:elevation="4dp"
+            android:foreground="@drawable/shape_light_stroke"
+            android:gravity="center"
+            android:text="5"
+            android:textColor="@color/text_light"
+            android:textSize="@dimen/unread_badge_text_size"
+            android:visibility="gone"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lastEntryTimestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="01:51"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

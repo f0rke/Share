@@ -43,7 +43,8 @@ public class ShareApp extends Application {
     public void sendRegistrationToServer(String refreshedToken) {
         User onUser = auth.getCurrentUser();
         if (onUser != null) {
-            database.registerPushToken(refreshedToken, onUser);
+            onUser.setPushToken(refreshedToken);
+            database.updateUserEntry(onUser);
         }
     }
 }

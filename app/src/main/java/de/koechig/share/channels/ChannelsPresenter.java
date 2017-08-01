@@ -84,7 +84,7 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
     }
 
     private void loadData() {
-        mDb.fetchChannels(new DBController.RetrieveCallback<List<Channel>>() {
+        mDb.fetchChannelsForUser(mAuth.getCurrentUser(), new DBController.RetrieveCallback<List<Channel>>() {
             @Override
             public void onSuccess(List<Channel> result) {
                 mView.showChannels(result);

@@ -80,11 +80,12 @@ public class AuthController {
         }
         if (mAuth.getCurrentUser() != null) {
             final String mail = mAuth.getCurrentUser().getEmail();
-            mDB.fetchUser(mStringHelper.getIdFromMail(mail), new DBController.RetrieveCallback<User>() {
+            final String uid = mAuth.getCurrentUser().getUid();
+            mDB.fetchUser(uid, new DBController.RetrieveCallback<User>() {
                 @Override
                 public void onSuccess(User result) {
                     if (result == null) {
-                        createUser(mail, new Callback() {
+                        createUser(uid, mail, new Callback() {
                             @Override
                             public void onSuccess() {
                                 callback.onFinish();
@@ -125,7 +126,11 @@ public class AuthController {
         if (mUser == null) {
             notifyListeners();
         } else {
-            mDB.registerPushToken(FirebaseInstanceId.getInstance().getToken(), mUser);
+            mUser.setPushToken(FirebaseInstanceId.getInstance().getToken());
+            if (mAuth.getCurrentUser() != null && !mUser.getUid().equals(mAuth.getCurrentUser().getUid())) {
+                mUser.setUid(mAuth.getCurrentUser().getUid());
+            }
+            mDB.updateUserEntry(mUser);
             mDB.subscribeToUserChanges(mUser.getKey(), mUserValueListener);
         }
     }
@@ -140,12 +145,12 @@ public class AuthController {
     private void onUserAuthUpdate(final FirebaseUser user) {
         if (user != null) {
             final String mail = user.getEmail();
-            String key = mStringHelper.getIdFromMail(mail);
-            mDB.fetchUser(key, new DBController.RetrieveCallback<User>() {
+            final String uid = user.getUid();
+            mDB.fetchUser(uid, new DBController.RetrieveCallback<User>() {
                 @Override
                 public void onSuccess(User result) {
                     if (result == null) {
-                        createUser(mail, new Callback() {
+                        createUser(uid, mail, new Callback() {
                             @Override
                             public void onSuccess() {
                             }
@@ -177,12 +182,12 @@ public class AuthController {
                     @Override
                     public void onComplete(@NonNull final Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            String key = mStringHelper.getIdFromMail(mail);
-                            mDB.fetchUser(key, new DBController.RetrieveCallback<User>() {
+                            final String uid = task.getResult().getUser().getUid();
+                            mDB.fetchUser(uid, new DBController.RetrieveCallback<User>() {
                                 @Override
                                 public void onSuccess(User result) {
                                     if (result == null) {
-                                        createUser(mail, callback);
+                                        createUser(uid, mail, callback);
                                     }
                                     updateUser(result);
                                     callback.onSuccess();
@@ -200,8 +205,8 @@ public class AuthController {
                 });
     }
 
-    private void createUser(String mail, final Callback callback) {
-        mDB.createUser(mail, new DBController.RetrieveCallback<User>() {
+    private void createUser(String uid, String mail, final Callback callback) {
+        mDB.createUser(uid, mail, new DBController.RetrieveCallback<User>() {
             @Override
             public void onSuccess(User result) {
                 updateUser(result);

@@ -15,15 +15,15 @@ public class StringHelper {
         return !TextUtils.isEmpty(password);
     }
 
-    public String getIdFromMail(String mail) {
-        if (isMail(mail)) {
-            String prefix = getMailPrefix(mail);
-            prefix = removeUnallowedFirebaseKeyChars(prefix);
-            return prefix;
-        } else {
-            return null;
-        }
-    }
+//    public String getIdFromMail(String mail) {
+//        if (isMail(mail)) {
+//            String prefix = getMailPrefix(mail);
+//            prefix = removeUnallowedFirebaseKeyChars(prefix);
+//            return prefix;
+//        } else {
+//            return null;
+//        }
+//    }
 
     public String convertToId(String candidate) {
         String id = null;
