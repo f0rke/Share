@@ -11,4 +11,6 @@
     <dimen name="list_item_detail_text_size">12sp</dimen>
     <dimen name="unread_badge_size">20dp</dimen>
     <dimen name="unread_badge_text_size">12sp</dimen>
+    <dimen name="item_list_item_min_width">128dp</dimen>
+    <dimen name="default_list_item_size">64dp</dimen>
 </resources>

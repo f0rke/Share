@@ -28,7 +28,7 @@ import javax.inject.Inject;
 
 import de.koechig.share.R;
 import de.koechig.share.base.ListAdapter;
-import de.koechig.share.base.OnItemClickListener;
+import de.koechig.share.channels.ChannelsAdapter.OnItemClickListener;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.createchannel.CreateChannelView;
 import de.koechig.share.items.ItemsActivity;
@@ -56,14 +56,14 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
             }
         }
     };
-    private OnItemClickListener<Channel> mOnItemClickListener = new OnItemClickListener<Channel>() {
+    private OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
         @Override
         public void onItemClick(Channel item) {
             mPresenter.onChannelClicked(item);
         }
     };
     @Inject
-    public ListAdapter<Channel> mAdapter;
+    public ChannelsAdapter mAdapter;
     @Inject
     public ColorHelper mColorHelper;
     //</editor-fold>
@@ -88,9 +88,10 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
-                .newChannelsSubComponent(new ChannelsModule(this, mOnItemClickListener))
-                .inject(this);
+        ChannelsSubComponent component = ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
+                .newChannelsSubComponent(new ChannelsModule(this, mOnItemClickListener));
+        component.inject(this);
+        component.inject(mAdapter);
         mCreateChannelView.onCreate();
     }
 

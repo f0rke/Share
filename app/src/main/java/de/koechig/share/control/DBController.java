@@ -275,6 +275,7 @@ public class DBController {
                     update.put(CHANNELS_NODE + "/" + channelKey + "/lastEntryTimestamp", item.getCreationDate());
                     update.put(CHANNELS_NODE + "/" + channelKey + "/lastEntry", item.getKey());
                     update.put(CHANNELS_NODE + "/" + channelKey + "/lastContributor", creator.getKey());
+                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastContributorFirstName", creator.getFirstName());
                     update.put(ITEMS_NODE + "/" + channelKey + "/" + item.getKey(), item);
                     mDatabase.updateChildren(update, new DatabaseReference.CompletionListener() {
                         @Override

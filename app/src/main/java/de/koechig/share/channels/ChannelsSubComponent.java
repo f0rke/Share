@@ -7,4 +7,6 @@ import dagger.Subcomponent;
 @Subcomponent(modules = ChannelsModule.class)
 public interface ChannelsSubComponent {
     void inject(ChannelsFragment obj);
+
+    void inject(ChannelsAdapter mAdapter);
 }

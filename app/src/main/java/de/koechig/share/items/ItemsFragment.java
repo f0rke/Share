@@ -22,10 +22,9 @@ import javax.inject.Inject;
 
 import de.koechig.share.R;
 import de.koechig.share.base.ListAdapter;
-import de.koechig.share.base.OnItemClickListener;
-import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.createitem.CreateItemView;
+import de.koechig.share.items.ItemAdapter.OnItemClickListener;
 import de.koechig.share.model.Channel;
 import de.koechig.share.model.Item;
 
@@ -40,8 +39,8 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
     private String mChannelKey;
     private SwipeRefreshLayout mSwipeLayout;
     private RecyclerView mRecycler;
-    private ListAdapter<Item> mAdapter;
-    private OnItemClickListener<Item> mOnItemClickListener = new OnItemClickListener<Item>() {
+    private ItemAdapter mAdapter;
+    private OnItemClickListener mOnItemClickListener = new OnItemClickListener() {
         @Override
         public void onItemClick(Item item) {
             mPresenter.onItemClicked(item);
@@ -65,6 +64,7 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
             mPresenter.update();
         }
     };
+    private ItemsSubComponent mComponent;
 
     public static ItemsFragment newInstance(String channelKey) {
 
@@ -79,9 +79,9 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mChannelKey = getArguments().getString(CHANNEL_IDENTIFIER);
-        ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
-                .newItemsSubComponent(new ItemsModule(this, mChannelKey))
-                .inject(this);
+        mComponent = ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
+                .newItemsSubComponent(new ItemsModule(this, mChannelKey));
+        mComponent.inject(this);
         mCreateItemView.onCreate();
         setHasOptionsMenu(true);
     }
@@ -92,6 +92,7 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
         View root = inflater.inflate(R.layout.fragment_items, container, false);
 
         mAdapter = new ItemAdapter(new ArrayList<Item>(0), mOnItemClickListener);
+        mComponent.inject(mAdapter);
 
         mRecycler = (RecyclerView) root.findViewById(R.id.recycler_view);
         mRecycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));

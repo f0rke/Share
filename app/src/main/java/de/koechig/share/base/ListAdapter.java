@@ -7,6 +7,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import de.koechig.share.R;
 
 /**
@@ -29,8 +31,12 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<ListAdapter.Vi
     protected void populateList(List<T> list) {
         this.mListItems = new ArrayList<>();
         for (T contentItems : list) {
-            mListItems.add(new ListItem<>(contentItems));
-
+            mListItems.add(new ListItem<T>(contentItems) {
+                @Override
+                public int getViewType() {
+                    return R.layout.default_list_item;
+                }
+            });
         }
     }
 
@@ -40,16 +46,17 @@ public abstract class ListAdapter<T> extends RecyclerView.Adapter<ListAdapter.Vi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public final TextView channelName;
         public final View rootView;
+        @BindView(R.id.name)
+        public TextView name;
 
         private OnItemClickListener<T> mItemClickListener;
 
         public ViewHolder(View itemView, OnItemClickListener<T> listener) {
             super(itemView);
+            ButterKnife.bind(this, itemView);
             this.rootView = itemView;
             this.mItemClickListener = listener;
-            channelName = (TextView) itemView.findViewById(R.id.name);
             rootView.setOnClickListener(this);
         }
 

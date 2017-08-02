@@ -9,4 +9,6 @@ import dagger.Subcomponent;
 @Subcomponent(modules = ItemsModule.class)
 public interface ItemsSubComponent {
     void inject(ItemsFragment obj);
+
+    void inject(ItemAdapter mAdapter);
 }

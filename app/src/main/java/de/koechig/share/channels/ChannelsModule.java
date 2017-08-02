@@ -11,7 +11,7 @@ import dagger.Module;
 import dagger.Provides;
 import de.koechig.share.R;
 import de.koechig.share.base.ListAdapter;
-import de.koechig.share.base.OnItemClickListener;
+import de.koechig.share.channels.ChannelsAdapter.OnItemClickListener;
 import de.koechig.share.channels.ChannelsPresenter.ResourceProvider;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
@@ -24,9 +24,9 @@ import de.koechig.share.model.Channel;
 @Module
 public class ChannelsModule {
     private final ChannelsFragment mFragment;
-    private final OnItemClickListener<Channel> mClickListener;
+    private final OnItemClickListener mClickListener;
 
-    public ChannelsModule(ChannelsFragment fragment, OnItemClickListener<Channel> clickListener) {
+    public ChannelsModule(ChannelsFragment fragment, OnItemClickListener clickListener) {
         mFragment = fragment;
         mClickListener = clickListener;
     }
@@ -57,7 +57,7 @@ public class ChannelsModule {
     }
 
     @Provides
-    public ListAdapter<Channel> provideAdapter() {
+    public ChannelsAdapter provideAdapter() {
         return new ChannelsAdapter(new ArrayList<Channel>(0), mClickListener);
     }
 

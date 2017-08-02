@@ -26,4 +26,10 @@ public class HelperModule {
     public ColorHelper provideColorHelper(Context context) {
         return new ColorHelper(context);
     }
+
+    @Provides
+    @Singleton
+    public TimestampHelper provideTimestampHelper(Context context) {
+        return new TimestampHelper(context);
+    }
 }

@@ -13,6 +13,7 @@ public class Item extends DB_Item {
     private long creationDate;
     private String name;
     private String description;
+    private String creatorFirstName;
 
     public Item(String name,
                 @Nullable String description,
@@ -22,6 +23,7 @@ public class Item extends DB_Item {
         this.name = name;
         this.description = description;
         this.creator = creator.getKey();
+        this.creatorFirstName = creator.getFirstName();
         this.creationDate = System.currentTimeMillis();
     }
 
@@ -42,5 +44,9 @@ public class Item extends DB_Item {
 
     public long getCreationDate() {
         return creationDate;
+    }
+
+    public String getCreatorFirstName() {
+        return creatorFirstName;
     }
 }
