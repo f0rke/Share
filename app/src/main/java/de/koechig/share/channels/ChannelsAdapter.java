@@ -32,6 +32,7 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.Channe
     protected List<ListItem> mListItems;
     protected OnItemClickListener mItemClickListener;
 
+    //<editor-fold desc="# Setup #">
     public ChannelsAdapter(List<Channel> contentItems, OnItemClickListener listener) {
         mItemClickListener = listener;
         populateList(contentItems);
@@ -68,7 +69,9 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.Channe
         }
         return null;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="# Binding #">
     @Override
     public void onBindViewHolder(ChannelViewHolder holder, int position) {
         ListItem<Channel> listItem = mListItems.get(position);
@@ -103,7 +106,9 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.Channe
             holder.lastEntryTimestamp.setText("");
         }
     }
+    //</editor-fold>
 
+    //<editor-fold desc="# Inner classes #">
     abstract class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View rootView;
 
@@ -158,4 +163,5 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.Channe
             return R.layout.layout_channel_list_item;
         }
     }
+    //</editor-fold>
 }

@@ -74,6 +74,7 @@ public class ItemsPresenter implements ItemsScreen.Presenter {
         if (mView != null) {
             mView.showProgress();
         }
+        mDb.listenForItems(mChannel,mItemsFetchCallback);
         mDb.fetchItems(mChannel, mItemsFetchCallback);
     }
 

@@ -26,7 +26,7 @@
             android:foreground="@drawable/shape_light_stroke"
             android:gravity="center"
             android:maxEms="2"
-            android:text="D"
+            android:text="A"
             android:textSize="@dimen/medium_icon_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"

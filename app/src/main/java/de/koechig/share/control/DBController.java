@@ -2,10 +2,12 @@ package de.koechig.share.control;
 
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.collect.Iterables;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,6 +32,8 @@ import de.koechig.share.util.StringHelper;
  */
 
 public class DBController {
+
+    private static final String TAG = DBController.class.getSimpleName();
 
     private DatabaseReference mDatabase;
     private StringHelper mStringHelper;
@@ -258,6 +262,61 @@ public class DBController {
         });
     }
 
+    public void listenForItems(Channel mChannel, RetrieveCallback<List<Item>> mItemsFetchCallback) {
+        mDatabase.child(ITEMS_NODE).child(mChannel.getKey()).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot newChild, String previousChildKey) {
+                Log.d(TAG,
+                        ITEMS_NODE + ".ChildEventListener: "
+                                + "onChildAdded(DataSnapshot newChild("
+                                + newChild.toString() + ")"
+                                + ", String previousChildKey("
+                                + previousChildKey + ")"
+                );
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot changedChild, String previousChildKey) {
+                Log.d(TAG,
+                        ITEMS_NODE + ".ChildEventListener: "
+                                + "onChildChanged(DataSnapshot changedChild("
+                                + changedChild.toString() + ")"
+                                + ", String previousChildKey("
+                                + previousChildKey + ")"
+                );
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot removed) {
+                Log.d(TAG,
+                        ITEMS_NODE + ".ChildEventListener: "
+                                + "onChildRemoved(DataSnapshot removed("
+                                + removed.toString() + ")"
+                );
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot movedChild, String previousChildKey) {
+                Log.d(TAG,
+                        ITEMS_NODE + ".ChildEventListener: "
+                                + "onChildMoved(DataSnapshot movedChild("
+                                + movedChild.toString() + ")"
+                                + ", String previousChildKey("
+                                + previousChildKey + ")"
+                );
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG,
+                        ITEMS_NODE + ".ChildEventListener: "
+                                + "onCancelled(DatabaseError databaseError("
+                                + databaseError.toString() + ")"
+                );
+            }
+        });
+    }
+
     public void submitNewItemToChannel(
             @NonNull final Item item,
             @NonNull final String channelKey,
@@ -297,7 +356,7 @@ public class DBController {
             }
         });
     }
-//</editor-fold>
+    //</editor-fold>
 
     //<editor-fold desc="# Push #">
     public void updateUserEntry(final User user) {
@@ -318,7 +377,7 @@ public class DBController {
             }
         });
     }
-//</editor-fold>
+    //</editor-fold>
 
     //<editor-fold desc="# Inner classes #">
     public interface RetrieveCallback<T> {
@@ -347,5 +406,5 @@ public class DBController {
 
         String getUserAlreadyExistingMessage();
     }
-//</editor-fold>
+    //</editor-fold>
 }
