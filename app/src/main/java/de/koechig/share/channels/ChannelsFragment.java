@@ -264,5 +264,11 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
         Intent intent = ItemsActivity.getStartIntent(getContext(), channel.getKey());
         startActivity(intent);
     }
+
+    @Override
+    public void showError(Exception e) {
+        //TODO
+        throw new RuntimeException(e);
+    }
     //</editor-fold>
 }

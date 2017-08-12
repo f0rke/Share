@@ -32,7 +32,7 @@ public class CreateChannelView implements CreateChannelScreen.View {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
             if (mItemName != null) {
-                mPresenter.onSaveClicked(mItemName.getText().toString(), Arrays.asList("moritzkoechig", "stefanbaehr"));
+                mPresenter.onSaveClicked(mItemName.getText().toString());
             }
         }
     };
@@ -43,9 +43,10 @@ public class CreateChannelView implements CreateChannelScreen.View {
 
     //<editor-fold desc="# Lifecycle #">
     public void onCreate() {
-        ((ShareApp) mStub.getContext().getApplicationContext()).getApplicationComponent()
-                .newCreateChannelSubComponent(new CreateChannelScreen.CreateChannelModule())
-                .inject(this);
+        CreateChannelScreen.CreateChannelSubComponent component = ((ShareApp) mStub.getContext().getApplicationContext()).getApplicationComponent()
+                .newCreateChannelSubComponent(new CreateChannelScreen.CreateChannelModule());
+        component.inject(this);
+        component.inject((CreateChannelPresenter) mPresenter);
     }
 
     public void onResume() {

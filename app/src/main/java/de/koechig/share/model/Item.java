@@ -12,16 +12,13 @@ public class Item extends DB_Item {
     private String creator;
     private long creationDate;
     private String name;
-    private String description;
     private String creatorFirstName;
 
     public Item(String name,
-                @Nullable String description,
                 User creator) {
         StringHelper helper = new StringHelper();
         this.key = helper.convertToId(name);
         this.name = name;
-        this.description = description;
         this.creator = creator.getKey();
         this.creatorFirstName = creator.getFirstName();
         this.creationDate = System.currentTimeMillis();
@@ -36,10 +33,6 @@ public class Item extends DB_Item {
 
     public String getName() {
         return name;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public long getCreationDate() {

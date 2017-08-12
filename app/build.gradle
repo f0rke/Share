@@ -3,12 +3,18 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
+
+    def version = 0
+    def major = 1
+    def minor = 2
+    def playVersionCounter = 4
+
     defaultConfig {
         applicationId "de.koechig.share"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 4
-        versionName "0.1.2.${versionCode}"
+        versionCode playVersionCounter
+        versionName "${version}.${major}.${minor}.${versionCode}"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

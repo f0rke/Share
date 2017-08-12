@@ -28,12 +28,11 @@ public class CreateItemView implements CreateItemScreen.View {
 
     private TextView mErrorText;
     private TextInputEditText mItemName;
-    private TextInputEditText mItemDescription;
     private View.OnClickListener mOnSaveClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (mItemName != null) {
-                mPresenter.onSaveClicked(mItemName.getText().toString(), mItemDescription != null ? mItemDescription.getText().toString() : null);
+                mPresenter.onSaveClicked(mItemName.getText().toString());
             }
         }
     };
@@ -102,7 +101,6 @@ public class CreateItemView implements CreateItemScreen.View {
                 builder.setTitle(R.string.new_item);
                 View body = LayoutInflater.from(mStub.getContext()).inflate(R.layout.layout_create_item, null, false);
                 mItemName = (TextInputEditText) body.findViewById(R.id.input_item_name);
-                mItemDescription = (TextInputEditText) body.findViewById(R.id.input_item_description);
                 mErrorText = (TextView) body.findViewById(R.id.error_text);
                 builder.setView(body);
                 builder.setPositiveButton(R.string.save, mDoNothingListener);
@@ -124,7 +122,6 @@ public class CreateItemView implements CreateItemScreen.View {
         mCreateItemDialog.dismiss();
         mCreateItemDialog = null;
         mErrorText = null;
-        mItemDescription = null;
         mItemName = null;
     }
 

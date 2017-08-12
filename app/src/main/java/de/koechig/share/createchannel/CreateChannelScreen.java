@@ -7,6 +7,7 @@ import dagger.Provides;
 import dagger.Subcomponent;
 import de.koechig.share.base.AbstractPresenter;
 import de.koechig.share.base.AbstractView;
+import de.koechig.share.channels.ChannelsPresenter;
 import de.koechig.share.control.DBController;
 
 /**
@@ -30,7 +31,7 @@ public interface CreateChannelScreen {
 
         void onAddNewChannel();
 
-        void onSaveClicked(String name, List<String> users);
+        void onSaveClicked(String name);
     }
 
     /**
@@ -39,7 +40,9 @@ public interface CreateChannelScreen {
 
     @Subcomponent(modules = CreateChannelModule.class)
     interface CreateChannelSubComponent {
-        void inject(CreateChannelView obj);
+        void inject(CreateChannelView view);
+
+        void inject(CreateChannelPresenter presenter);
     }
 
     /**
@@ -49,8 +52,8 @@ public interface CreateChannelScreen {
     @Module
     class CreateChannelModule {
         @Provides
-        public Presenter providePresenter(DBController db) {
-            return new CreateChannelPresenter(db);
+        public Presenter providePresenter() {
+            return new CreateChannelPresenter();
         }
     }
 }

@@ -36,7 +36,7 @@ public interface CreateItemScreen {
 
         void onAddNewItem(String key);
 
-        void onSaveClicked(String name, String description);
+        void onSaveClicked(String name);
     }
 
     /**

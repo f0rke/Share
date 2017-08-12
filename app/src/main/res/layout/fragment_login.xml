@@ -22,6 +22,22 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/beta_disclaimer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/beta_disclaimer"
+                android:paddingBottom="8dp"
+                android:textColor="@color/colorAccent" />
+
+            <TextView
+                android:id="@+id/ony_registered"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="@string/only_registered_users_allowed"
+                android:textColor="@color/colorAccent" />
+
+            <TextView
                 android:id="@+id/error_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

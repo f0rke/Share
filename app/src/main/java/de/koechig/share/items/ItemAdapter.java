@@ -1,6 +1,7 @@
 package de.koechig.share.items;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.koechig.share.R;
 import de.koechig.share.base.ListItem;
+import de.koechig.share.control.AuthController;
 import de.koechig.share.model.Item;
 import de.koechig.share.util.TimestampHelper;
 
@@ -25,6 +27,8 @@ import de.koechig.share.util.TimestampHelper;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     @Inject
     TimestampHelper mHelper;
+    @Inject
+    AuthController mAuth;
     protected List<ListItem> mListItems;
     protected OnItemClickListener mItemClickListener;
 
@@ -66,6 +70,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.time.setText(mHelper.toSmartDisplayTime(item.getCreationDate()));
         holder.username.setText(item.getCreatorFirstName());
         holder.item_text.setText(item.getName());
+        holder.rootView.setForegroundGravity(Gravity.RIGHT);
     }
 
     @Override
@@ -78,6 +83,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         return mListItems.get(position).getViewType();
     }
 
+    //<editor-fold desc="# Inner classes #">
     abstract class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         final View rootView;
 
@@ -126,4 +132,5 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             return R.layout.layout_item_list_item;
         }
     }
+    //</editor-fold>
 }

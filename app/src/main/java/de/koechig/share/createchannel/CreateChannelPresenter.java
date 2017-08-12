@@ -1,7 +1,11 @@
 package de.koechig.share.createchannel;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import de.koechig.share.control.AuthController;
 import de.koechig.share.control.DBController;
 
 /**
@@ -12,12 +16,12 @@ import de.koechig.share.control.DBController;
  */
 
 public class CreateChannelPresenter implements CreateChannelScreen.Presenter {
-    private CreateChannelScreen.View mView;
-    private DBController mDb;
+    @Inject
+    AuthController mAuth;
+    @Inject
+    DBController mDb;
 
-    public CreateChannelPresenter(DBController db) {
-        this.mDb = db;
-    }
+    private CreateChannelScreen.View mView;
 
     @Override
     public void bindView(CreateChannelScreen.View view) {
@@ -43,10 +47,13 @@ public class CreateChannelPresenter implements CreateChannelScreen.Presenter {
     }
 
     @Override
-    public void onSaveClicked(final String name, List<String> users) {
+    public void onSaveClicked(final String name) {
         if (mView != null) {
             mView.showProgress();
         }
+        List<String> users = new ArrayList<String>() {{
+            add(mAuth.getCurrentUser().getUid());
+        }};
         mDb.createChannel(name, users, new DBController.ActionCallback() {
             @Override
             public void onSucceeded() {

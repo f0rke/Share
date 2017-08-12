@@ -26,6 +26,21 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
     };
     private final ResourceProvider mProvider;
     private boolean mSingleChannelShortCutUsed = false;
+    private DBController.RetrieveCallback<List<Channel>> mRecurringUpdateListener = new DBController.RetrieveCallback<List<Channel>>() {
+        @Override
+        public void onSuccess(List<Channel> result) {
+            if (mView != null) {
+                mView.showChannels(result);
+            }
+        }
+
+        @Override
+        public void onError(Exception e) {
+            if (mView != null) {
+                mView.showError(e);
+            }
+        }
+    };
 
     public ChannelsPresenter(AuthController auth, DBController db, ResourceProvider provider) {
         mAuth = auth;
@@ -65,6 +80,7 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         mView = view;
         update();
         mAuth.addListener(mUserListener);
+        mDb.registerForFutureChannelChanges(mAuth.getCurrentUser(), mRecurringUpdateListener);
     }
 
     @Override
@@ -92,13 +108,17 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
                     onChannelClicked(result.get(0));
                     mSingleChannelShortCutUsed = true;
                 } else {
-                    mView.showChannels(result);
+                    if (mView != null) {
+                        mView.showChannels(result);
+                    }
                 }
             }
 
             @Override
             public void onError(Exception e) {
-
+                if (mView != null) {
+                    mView.showError(e);
+                }
             }
         });
     }
@@ -107,7 +127,13 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         if (mView != null) {
             User user = mAuth.getCurrentUser();
             if (user != null) {
-                String username = user.getFirstName() != null ? user.getFirstName() : "";
+                String username = "";
+                if (user.getFirstName() != null) {
+                    username = username.concat(user.getFirstName());
+                }
+                if (user.getFirstName() != null) {
+                    username = username.concat(" " + user.getLastName());
+                }
                 mView.setUsername(username);
                 String userMail = user.getEmail() != null ? user.getEmail() : mProvider.getNoUserMailErrorString();
                 mView.setUserMail(userMail);

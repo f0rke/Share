@@ -120,6 +120,11 @@ public class DBController {
     //</editor-fold>
 
     //<editor-fold desc="# Channels #">
+
+    public void registerForFutureChannelChanges(User user, RetrieveCallback<List<Channel>> listener) {
+
+    }
+
     public void fetchChannelsForUser(User user, final RetrieveCallback<List<Channel>> callback) {
         mDatabase.child(USERS_NODE + "/" + user.getUid() + "/" + CHANNELS_NODE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -183,7 +188,8 @@ public class DBController {
             final List<String> memberNames,
             final ActionCallback callback) {
         final Channel channel = new Channel(name, memberNames);
-        mDatabase.child(CHANNELS_NODE).child(channel.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+        String key = mDatabase.child(CHANNELS_NODE).push().getKey();
+        mDatabase.child(CHANNELS_NODE).child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="beta_disclaimer">This is an under construction version. Some functionality may not be working as expected. If any errors occur, please contact support. Your feedback on this version is highly appreciated!</string>
+    <string name="only_registered_users_allowed" >"This version only supports previously created accounts. If you don't have one, please contact us to get one."</string>
+</resources>

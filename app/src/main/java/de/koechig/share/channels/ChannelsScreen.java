@@ -40,6 +40,8 @@ public interface ChannelsScreen {
         void showChannels(List<Channel> result);
 
         void showItemsScreen(Channel channel);
+
+        void showError(Exception e);
     }
 
     interface Presenter extends AbstractPresenter<View> {

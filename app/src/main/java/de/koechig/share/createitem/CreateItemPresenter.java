@@ -49,9 +49,9 @@ public class CreateItemPresenter implements CreateItemScreen.Presenter {
     }
 
     @Override
-    public void onSaveClicked(final String name, String description) {
+    public void onSaveClicked(final String name) {
         if (name != null && !name.isEmpty()) {
-            final Item item = new Item(name, description != null && !description.isEmpty() ? description : null, mAuth.getCurrentUser());
+            final Item item = new Item(name, mAuth.getCurrentUser());
             if (mChannelKey != null && mAuth.getCurrentUser() != null) {
                 if (mView != null) {
                     mView.showProgress();
