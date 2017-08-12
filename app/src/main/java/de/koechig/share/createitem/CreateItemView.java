@@ -11,8 +11,6 @@ import android.widget.TextView;
 import javax.inject.Inject;
 
 import de.koechig.share.R;
-import de.koechig.share.control.AuthController;
-import de.koechig.share.control.DBController;
 import de.koechig.share.control.ShareApp;
 
 /**
@@ -52,7 +50,7 @@ public class CreateItemView implements CreateItemScreen.View {
     //<editor-fold desc="# Lifecycle #">
     public void onCreate() {
         ((ShareApp) mStub.getContext().getApplicationContext()).getApplicationComponent()
-                .newCreateChannelSubComponent(new CreateItemModule())
+                .newCreateChannelSubComponent(new CreateItemScreen.CreateItemModule())
                 .inject(this);
     }
 

@@ -21,7 +21,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import de.koechig.share.R;
-import de.koechig.share.base.ListAdapter;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.createitem.CreateItemView;
 import de.koechig.share.items.ItemAdapter.OnItemClickListener;
@@ -64,8 +63,9 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
             mPresenter.update();
         }
     };
-    private ItemsSubComponent mComponent;
+    private ItemsScreen.ItemsSubComponent mComponent;
 
+    //<editor-fold desc="# Lifecycle #">
     public static ItemsFragment newInstance(String channelKey) {
 
         Bundle args = new Bundle();
@@ -80,7 +80,7 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
         super.onCreate(savedInstanceState);
         mChannelKey = getArguments().getString(CHANNEL_IDENTIFIER);
         mComponent = ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
-                .newItemsSubComponent(new ItemsModule(this, mChannelKey));
+                .newItemsSubComponent(new ItemsScreen.ItemsModule(this, mChannelKey));
         mComponent.inject(this);
         mCreateItemView.onCreate();
         setHasOptionsMenu(true);
@@ -140,6 +140,7 @@ public class ItemsFragment extends Fragment implements ItemsScreen.View {
         mCreateItemView.onDestroy();
         super.onDestroy();
     }
+    //</editor-fold>
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

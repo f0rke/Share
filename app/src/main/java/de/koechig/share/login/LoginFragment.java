@@ -25,10 +25,7 @@ import android.widget.TextView;
 import javax.inject.Inject;
 
 import de.koechig.share.R;
-import de.koechig.share.channels.ChannelsModule;
 import de.koechig.share.control.ShareApp;
-import de.koechig.share.control.AuthController;
-import de.koechig.share.util.StringHelper;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -98,7 +95,7 @@ public class LoginFragment extends Fragment implements LoginScreen.View {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
-                .newLoginSubComponent(new LoginModule())
+                .newLoginSubComponent(new LoginScreen.LoginModule())
                 .inject(this);
         setHasOptionsMenu(true);
     }

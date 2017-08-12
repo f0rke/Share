@@ -25,6 +25,7 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         }
     };
     private final ResourceProvider mProvider;
+    private boolean mSingleChannelShortCutUsed = false;
 
     public ChannelsPresenter(AuthController auth, DBController db, ResourceProvider provider) {
         mAuth = auth;
@@ -87,7 +88,12 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         mDb.fetchChannelsForUser(mAuth.getCurrentUser(), new DBController.RetrieveCallback<List<Channel>>() {
             @Override
             public void onSuccess(List<Channel> result) {
-                mView.showChannels(result);
+                if (result.size() == 1 && !mSingleChannelShortCutUsed) {
+                    onChannelClicked(result.get(0));
+                    mSingleChannelShortCutUsed = true;
+                } else {
+                    mView.showChannels(result);
+                }
             }
 
             @Override

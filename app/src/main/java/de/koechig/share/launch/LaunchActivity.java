@@ -8,8 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import javax.inject.Inject;
 
 import de.koechig.share.R;
-import de.koechig.share.channels.ChannelsModule;
-import de.koechig.share.control.AuthController;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.channels.ChannelsActivity;
 import de.koechig.share.login.LoginActivity;
@@ -31,7 +29,7 @@ public class LaunchActivity extends AppCompatActivity implements LaunchScreen.Vi
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ((ShareApp) getApplicationContext()).getApplicationComponent()
-                .newLaunchSubComponent(new LaunchModule())
+                .newLaunchSubComponent(new LaunchScreen.LaunchModule())
                 .inject(this);
         setContentView(R.layout.activity_launch);
     }

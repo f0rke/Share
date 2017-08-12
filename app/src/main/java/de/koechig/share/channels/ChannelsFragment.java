@@ -27,7 +27,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import de.koechig.share.R;
-import de.koechig.share.base.ListAdapter;
 import de.koechig.share.channels.ChannelsAdapter.OnItemClickListener;
 import de.koechig.share.control.ShareApp;
 import de.koechig.share.createchannel.CreateChannelView;
@@ -88,8 +87,8 @@ public class ChannelsFragment extends Fragment implements ChannelsScreen.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChannelsSubComponent component = ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
-                .newChannelsSubComponent(new ChannelsModule(this, mOnItemClickListener));
+        ChannelsScreen.ChannelsSubComponent component = ((ShareApp) getContext().getApplicationContext()).getApplicationComponent()
+                .newChannelsSubComponent(new ChannelsScreen.ChannelsModule(this, mOnItemClickListener));
         component.inject(this);
         component.inject(mAdapter);
         mCreateChannelView.onCreate();

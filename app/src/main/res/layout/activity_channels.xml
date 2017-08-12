@@ -38,7 +38,7 @@
             app:fabSize="normal"
             app:layout_anchor="@id/content_container"
             app:layout_anchorGravity="bottom|end"
-            app:srcCompat="@android:drawable/ic_menu_share" />
+            app:srcCompat="@drawable/ic_add" />
 
     </android.support.design.widget.CoordinatorLayout>
 
