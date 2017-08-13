@@ -200,6 +200,32 @@ exports.handleChannelsWrite = functions.database
         }
     });
 
+exports.handleUserAdd = functions.database
+    .ref('/channels/{channelId}/members/{userId}')
+    .onWrite(event => {
+        var channelId = event.params.channelId
+        var userId = event.params.userId
+        var isNew = !event.data.previous.exists()
+        var wasDeleted = !event.data.exists()
+        if (isNew) {
+            var userUpdate = admin.database()
+                .ref('/users/' + userId + '/channels/' + channelId)
+                .set(true)
+            var membersUpdate = admin.database()
+                .ref('/members/' + channelId + '/' + userId)
+                .set(true)
+            return Promise.all([userUpdate, membersUpdate])
+        } else if (wasDeleted) {
+            var userUpdate = admin.database()
+                .ref('/users/' + userId + '/channels/' + channelId)
+                .remove()
+            var membersUpdate = admin.database()
+                .ref('/members/' + channelId + '/' + userId)
+                .remove()
+            return Promise.all([userUpdate, membersUpdate])
+        }
+    })
+
 //##########################
 //######## Helpers #########
 //##########################

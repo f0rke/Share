@@ -1,5 +1,7 @@
 package de.koechig.share.model;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,9 +24,8 @@ public class Channel extends DB_Item {
     public Channel() {
     }
 
-    public Channel(String name, List<String> members) {
-        StringHelper helper = new StringHelper();
-        this.key = helper.convertToId(name);
+    public Channel(@NonNull String name, @NonNull List<String> members, @NonNull String pushId) {
+        this.key = pushId;
         this.name = name;
         this.members = new HashMap<>();
         for (String member : members) {

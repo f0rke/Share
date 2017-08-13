@@ -20,11 +20,17 @@ import de.koechig.share.control.DBController;
 public interface CreateChannelScreen {
     interface View extends AbstractView {
 
+        void showError(String error);
+
+        void hideError();
+
         void showCreateChannel();
 
         void showProgress();
 
         void hideProgress();
+
+        void close();
     }
 
     interface Presenter extends AbstractPresenter<View> {

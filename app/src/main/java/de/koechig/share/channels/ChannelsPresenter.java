@@ -69,9 +69,9 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
     }
 
     @Override
-    public void onChannelClicked(Channel item) {
+    public void onChannelClicked(Channel channel) {
         if (mView != null) {
-            mView.showItemsScreen(item);
+            mView.showItemsScreen(channel);
         }
     }
 
@@ -80,13 +80,20 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         mView = view;
         update();
         mAuth.addListener(mUserListener);
-        mDb.registerForFutureChannelChanges(mAuth.getCurrentUser(), mRecurringUpdateListener);
+        mDb.registerForFutureChannelListChanges(mRecurringUpdateListener);
     }
 
     @Override
     public void update() {
         updateSideMenu();
         handleAuthState();
+    }
+
+    @Override
+    public void unbindView() {
+        mDb.deregisterFromChannelListChanges(mRecurringUpdateListener);
+        mAuth.removeListener(mUserListener);
+        mView = null;
     }
 
     private void handleAuthState() {
@@ -147,12 +154,6 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
                 mView.displayLoginAction();
             }
         }
-    }
-
-    @Override
-    public void unbindView() {
-        mAuth.removeListener(mUserListener);
-        mView = null;
     }
 
     public interface ResourceProvider {

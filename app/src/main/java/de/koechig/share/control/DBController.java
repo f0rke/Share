@@ -121,8 +121,43 @@ public class DBController {
 
     //<editor-fold desc="# Channels #">
 
-    public void registerForFutureChannelChanges(User user, RetrieveCallback<List<Channel>> listener) {
+    Map<RetrieveCallback<List<Channel>>, ValueEventListener> mChannelListeners = new HashMap<>();
 
+    public void registerForFutureChannelListChanges(@NonNull final RetrieveCallback<List<Channel>> listener) {
+        ValueEventListener keyListener = new ValueEventListener() {
+            boolean firstCall = true;
+
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                if (firstCall) {
+                    firstCall = false;
+                } else {
+                    List<Channel> channels;
+                    if (dataSnapshot.getValue() != null) {
+                        channels = new ArrayList<Channel>() {{
+                            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                Channel item = child.getValue(Channel.class);
+                                add(item);
+                            }
+                        }};
+                    } else {
+                        channels = new ArrayList<>(0);
+                    }
+                    listener.onSuccess(channels);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mChannelListeners.put(listener, keyListener);
+        mDatabase.child(CHANNELS_NODE).addValueEventListener(keyListener);
+    }
+
+    public void deregisterFromChannelListChanges(@NonNull final RetrieveCallback<List<Channel>> listener) {
+        mChannelListeners.remove(listener);
     }
 
     public void fetchChannelsForUser(User user, final RetrieveCallback<List<Channel>> callback) {
@@ -185,10 +220,10 @@ public class DBController {
 
     public void createChannel(
             final String name,
-            final List<String> memberNames,
+            final List<String> memberIds,
             final ActionCallback callback) {
-        final Channel channel = new Channel(name, memberNames);
-        String key = mDatabase.child(CHANNELS_NODE).push().getKey();
+        final String key = mDatabase.child(CHANNELS_NODE).push().getKey();
+        final Channel channel = new Channel(name, memberIds, key);
         mDatabase.child(CHANNELS_NODE).child(key).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -198,11 +233,7 @@ public class DBController {
                 } else {
                     //Start transaction, create channel, link users to channel
                     Map<String, Object> update = new HashMap<>();
-                    update.put(CHANNELS_NODE + "/" + channel.getKey(), channel);
-                    for (String memberName : memberNames) {
-                        update.put(MEMBERS_NODE + "/" + channel.getKey() + "/" + memberName, true);
-                        update.put(USERS_NODE + "/" + memberName + "/channels/" + channel.getKey(), true);
-                    }
+                    update.put(CHANNELS_NODE + "/" + key, channel);
                     mDatabase.updateChildren(update, new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -221,10 +252,6 @@ public class DBController {
                 callback.onFailed(databaseError.toException());
             }
         });
-    }
-
-    public void subscribeToChannel(Channel channel, User newMember) {
-
     }
 
     public void fetchChannel(String mChannelKey, final RetrieveCallback<Channel> callback) {

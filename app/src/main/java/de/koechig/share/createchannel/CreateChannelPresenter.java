@@ -57,12 +57,18 @@ public class CreateChannelPresenter implements CreateChannelScreen.Presenter {
         mDb.createChannel(name, users, new DBController.ActionCallback() {
             @Override
             public void onSucceeded() {
-
+                if (mView != null) {
+                    mView.hideProgress();
+                    mView.hideError();
+                    mView.close();
+                }
             }
 
             @Override
             public void onFailed(Exception e) {
-
+                if (mView != null) {
+                    mView.showError(e.getMessage());
+                }
             }
         });
     }
