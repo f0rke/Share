@@ -196,9 +196,10 @@ exports.handleChannelsWrite = functions.database
             } else if (!channelStateChanged) {
                 console.log('New channel ' + channelId + ' validated and successfully created')
                 console.log('TODO: inform users')
+                return
             }
         }
-    });
+    })
 
 exports.handleUserAdd = functions.database
     .ref('/channels/{channelId}/members/{userId}')
@@ -208,6 +209,7 @@ exports.handleUserAdd = functions.database
         var isNew = !event.data.previous.exists()
         var wasDeleted = !event.data.exists()
         if (isNew) {
+            console.log('Adding new member ' + userId + ' of channel ' + channelId + ' to member and user channel lists')
             var userUpdate = admin.database()
                 .ref('/users/' + userId + '/channels/' + channelId)
                 .set(true)
@@ -216,7 +218,8 @@ exports.handleUserAdd = functions.database
                 .set(true)
             return Promise.all([userUpdate, membersUpdate])
         } else if (wasDeleted) {
-            var userUpdate = admin.database()
+           console.log('Removing member ' + userId + ' of channel ' + channelId + ' from member and user channel lists')
+             var userUpdate = admin.database()
                 .ref('/users/' + userId + '/channels/' + channelId)
                 .remove()
             var membersUpdate = admin.database()

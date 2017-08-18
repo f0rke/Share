@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 import de.koechig.share.model.Channel;
 import de.koechig.share.model.Item;
@@ -121,9 +122,9 @@ public class DBController {
 
     //<editor-fold desc="# Channels #">
 
-    Map<RetrieveCallback<List<Channel>>, ValueEventListener> mChannelListeners = new HashMap<>();
+    private Map<RetrieveCallback<List<Channel>>, ValueEventListener> mChannelListeners = new HashMap<>();
 
-    public void registerForFutureChannelListChanges(@NonNull final RetrieveCallback<List<Channel>> listener) {
+    public void registerForFutureChannelListChanges(final User user, @NonNull final RetrieveCallback<List<Channel>> listener) {
         ValueEventListener keyListener = new ValueEventListener() {
             boolean firstCall = true;
 
@@ -132,18 +133,7 @@ public class DBController {
                 if (firstCall) {
                     firstCall = false;
                 } else {
-                    List<Channel> channels;
-                    if (dataSnapshot.getValue() != null) {
-                        channels = new ArrayList<Channel>() {{
-                            for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                Channel item = child.getValue(Channel.class);
-                                add(item);
-                            }
-                        }};
-                    } else {
-                        channels = new ArrayList<>(0);
-                    }
-                    listener.onSuccess(channels);
+                    fetchChannelsForUser(user, listener);
                 }
             }
 
@@ -153,7 +143,7 @@ public class DBController {
             }
         };
         mChannelListeners.put(listener, keyListener);
-        mDatabase.child(CHANNELS_NODE).addValueEventListener(keyListener);
+        mDatabase.child(USERS_NODE).child(user.getUid()).child(CHANNELS_NODE).addValueEventListener(keyListener);
     }
 
     public void deregisterFromChannelListChanges(@NonNull final RetrieveCallback<List<Channel>> listener) {
@@ -165,11 +155,11 @@ public class DBController {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
-                    new AsyncTask<Object, Object, List<Channel>>() {
+                    new AsyncTask<Void, Void, List<Channel>>() {
                         final CountDownLatch latch = new CountDownLatch(Iterables.size(dataSnapshot.getChildren()));
 
                         @Override
-                        protected List<Channel> doInBackground(Object... voids) {
+                        protected List<Channel> doInBackground(Void... voids) {
                             Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                             final List<Channel> channels = new ArrayList<>();
                             for (DataSnapshot channelIdData : children) {
@@ -267,7 +257,7 @@ public class DBController {
             }
         });
     }
-//</editor-fold>
+    //</editor-fold>
 
     //<editor-fold desc="# Items #">
     public void fetchItems(Channel channel, final RetrieveCallback<List<Item>> callback) {

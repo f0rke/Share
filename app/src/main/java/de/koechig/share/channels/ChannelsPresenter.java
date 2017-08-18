@@ -80,7 +80,7 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         mView = view;
         update();
         mAuth.addListener(mUserListener);
-        mDb.registerForFutureChannelListChanges(mRecurringUpdateListener);
+        mDb.registerForFutureChannelListChanges(mAuth.getCurrentUser(), mRecurringUpdateListener);
     }
 
     @Override
