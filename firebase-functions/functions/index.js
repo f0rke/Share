@@ -247,13 +247,13 @@ function getUser(id) {
 exports.handleChannelsWrite = functions.database
     .ref('/' + CHANNELS_NODE + '/{id}')
     .onWrite(event => {
-        var value = event.data.val()
-        if (value.key) {
-            var channelId = value.key
+        var channelId = event.params.id
+        let channelCreated = !event.data.previous.exists()
+        let channelDeleted = !channelCreated && !event.data.exists()
+        let channelStateChanged = !channelCreated && event.data.changed()
+        if (!channelDeleted) {
+            var value = event.data.val()
             //Check if this is a new channel with poperly setup properties
-            let channelCreated = !event.data.previous.exists()
-            let channelDeleted = !channelCreated && !event.data.exists()
-            let channelStateChanged = !channelCreated && event.data.changed()
             if (channelCreated && !value.members && !value.lastEntry) {
                 console.log(
                     'Removing ' + channelId + ' due to no members and no items'
@@ -264,12 +264,12 @@ exports.handleChannelsWrite = functions.database
                 console.log('New channel ' + channelId + ' validated and successfully created')
                 console.log('TODO: inform users')
                 return
-            } else if (channelDeleted) {
-                //Channel is deleted, remove all references
-                return admin.database()
-                    .ref('/' + ITEMS_NODE)
-                    .remove(channelId)
             }
+        } else {
+            //Channel is deleted, remove all references
+            return admin.database()
+                .ref('/' + ITEMS_NODE + '/' + channelId)
+                .remove()
         }
     })
 

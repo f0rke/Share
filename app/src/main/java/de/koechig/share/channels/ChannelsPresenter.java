@@ -118,14 +118,9 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
             mDb.fetchChannelsForUser(mAuth.getCurrentUser(), new DBController.RetrieveCallback<List<Channel>>() {
                 @Override
                 public void onSuccess(List<Channel> result) {
-//                    if (result.size() == 1 && !mSingleChannelShortCutUsed) {
-//                        onChannelClicked(result.get(0));
-//                        mSingleChannelShortCutUsed = true;
-//                    } else {
-                        if (mView != null) {
-                            mView.showChannels(result);
-                        }
-//                    }
+                    if (mView != null) {
+                        mView.showChannels(result);
+                    }
                 }
 
                 @Override
