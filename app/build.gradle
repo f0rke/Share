@@ -6,8 +6,8 @@ android {
 
     def version = 0
     def major = 1
-    def minor = 3
-    def playVersionCounter = 5
+    def minor = 4
+    def playVersionCounter = 6
 
     defaultConfig {
         applicationId "de.koechig.share"
