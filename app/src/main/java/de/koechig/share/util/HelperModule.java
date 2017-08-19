@@ -6,8 +6,6 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import de.koechig.share.util.ColorHelper;
-import de.koechig.share.util.StringHelper;
 
 /**
  * Created by Mumpi_000 on 27.06.2017.
@@ -29,7 +27,7 @@ public class HelperModule {
 
     @Provides
     @Singleton
-    public TimestampHelper provideTimestampHelper(Context context) {
-        return new TimestampHelper(context);
+    public DateHelper provideTimestampHelper(Context context) {
+        return new DateHelper(context);
     }
 }

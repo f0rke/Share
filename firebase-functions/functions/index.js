@@ -5,8 +5,12 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
+const util = require('util')
 
-
+let ITEMS_NODE = 'items'
+let MEMBERS_NODE = 'members'
+let USERS_NODE = 'users'
+let CHANNELS_NODE = 'channels'
 
 //#########################
 //######### Users #########
@@ -34,22 +38,25 @@ exports.copyUserToDatabase = functions.auth.user().onCreate(event => {
 
     const firstName = getFirstNameFromMail(mail)
     const lastName = getLastNameFromMail(mail)
-    const key = getIdFromMail(mail)
 
     var dbUser = {
-        firstName: firstName,
-        lastName: lastName,
-        key: key,
+        uid: uid,
         email: mail
     }
+    if (firstName != null) {
+        dbUser.firstName = firstName
+    }
+    if (lastName != null) {
+        dbUser.lastName = lastName
+    }
     let dbPromise = admin.database()
-        .ref('/users')
+        .ref('/' + USERS_NODE)
         .once('value', snap => {
-            if (snap.hasChild(key)) {
-                return markUserAsDeleted(key, false)
+            if (snap.hasChild(uid)) {
+                return setUserDeletedField(uid, false)
             } else {
                 return admin.database()
-                    .ref('/users/' + key)
+                    .ref('/' + USERS_NODE + '/' + uid)
                     .set(dbUser)
                     .then(snapshot => {
                         console.log("Successfully created user \"" + displayName + "\"")
@@ -68,9 +75,8 @@ exports.copyUserToDatabase = functions.auth.user().onCreate(event => {
 
 exports.markUserAsDeleted = functions.auth.user().onDelete(event => {
     let user = event.data
-    let key = getIdFromMail(user.email.toString())
-    if (key) {
-        markUserAsDeleted(key, true)
+    if (user.uid) {
+        setUserDeletedField(user.uid, true)
     }
 })
 
@@ -78,72 +84,132 @@ exports.markUserAsDeleted = functions.auth.user().onDelete(event => {
 //######## Items #########
 //########################
 
-exports.notifyMembersOfNewPosts = functions.database
-    .ref('/items/{channelId}/{itemId}')
+exports.onNewPost = functions.database
+    .ref('/' + ITEMS_NODE + '/{channelId}/{itemId}')
     .onWrite(event => {
         let channelId = event.params.channelId
         let itemId = event.params.itemId
         let item = event.data.val()
 
+        console.log("Item '" + itemId + "' written to '" + channelId + "'")
+
         let newItem = !event.data.previous.exists()
         let itemChanged = !newItem && event.data.changed()
+        let itemDeleted = !event.data.exists() && event.data.previous.exists()
 
-        var title
-        if (newItem == true) {
-            title = "New entry"
-        } else {
-            if (itemChanged) {
-                title = "ItemChanged"
-            } else {
-                title = channelId
-            }
+        let itemInfo = {
+            data: item,
+            isNew: newItem,
+            changed: itemChanged,
+            deleted: itemDeleted,
+            channel: channelId
         }
 
-        var msg = item.name
-        if (item.description) {
-            msg = (msg ? msg : item.key) + " - " + item.description
+        if (!itemDeleted) {
+            let pushPromise = sendPush(itemInfo)
         }
+        let updateChannelPromise = updateChannelWithNewItem(itemInfo)
 
-        console.log("Item '" + itemId + "' written to '" + channelId + "'")
-        return loadUsersFromChannel(channelId)
-            .then(ids => {
-                console.log("Received user IDs: " + ids)
-                let promises = []
-                for (var i = 0; i < ids.length; i++) {
-                    promises.push(getUser(ids[i]))
-                }
-                return Promise.all(promises)
-                    .then(results => {
-
-                        let tokens = []
-                        for (var i = 0; i < results.length; i++) {
-                            const user = results[i]
-                            const pushToken = user.currentPushToken;
-                            if (pushToken) {
-                                tokens.push(pushToken)
-                            }
-                        }
-                        if (tokens.length > 0) {
-                            console.log("Trying to send notification with title '" + title + "' and body '" + msg + "'")
-                            let payload = {
-                                notification: {
-                                    title: title,
-                                    body: msg ? msg : "some body",
-                                    sound: 'default',
-                                    badge: '1'
-                                }
-                            };
-                            return admin.messaging().sendToDevice(tokens, payload);
-                        }
-                    }).catch(err => {
-                        console.log(err)
-                    })
-            })
+        return Promise.all([pushPromise, updateChannelPromise])
     })
+
+function updateChannelWithNewItem(itemInfo) {
+
+    console.log('updateChannelWithNewItem: ' + util.inspect(itemInfo, { showHidden: false, depth: null }))
+
+    if (itemInfo.isNew === true || itemInfo.changed === true) {
+        //Data
+        let contributorName = itemInfo.data.creatorFirstName
+        let contributor = itemInfo.data.creator
+        let date = itemInfo.data.creationDate
+        let lastEntry = itemInfo.data.name
+        let channel = itemInfo.channel
+
+        //Promises
+        console.log('Setting /' + CHANNELS_NODE + '/' + channel + '/lastContributor = ' + contributor)
+        let updateContributor = admin.database()
+            .ref('/' + CHANNELS_NODE + '/' + channel + '/lastContributor')
+            .set(contributor)
+
+        console.log('Setting /' + CHANNELS_NODE + '/' + channel + '/lastContributorFirstName = ' + contributorName)
+        let updateContributorName = admin.database()
+            .ref('/' + CHANNELS_NODE + '/' + channel + '/lastContributorFirstName')
+            .set(contributorName)
+
+        console.log('Setting /' + CHANNELS_NODE + '/' + channel + '/lastEntry = ' + lastEntry)
+        let updateEntry = admin.database()
+            .ref('/' + CHANNELS_NODE + '/' + channel + '/lastEntry')
+            .set(lastEntry)
+
+        console.log('Setting /' + CHANNELS_NODE + '/' + channel + '/lastEntryDate = ' + date)
+        let updateEntryDate = admin.database()
+            .ref('/' + CHANNELS_NODE + '/' + channel + '/lastEntryDate')
+            .set(date)
+
+        return Promise
+            .all([
+                updateContributor,
+                updateContributorName,
+                updateEntry,
+                updateEntryDate])
+    } else if (itemInfo.deleted == true) {
+        //TODO: search for last entry and update channel accordingly
+    }
+}
+
+function sendPush(itemInfo) {
+    var title
+    if (itemInfo.isNew == true) {
+        title = "New entry"
+    } else {
+        if (itemInfo.changed) {
+            title = "ItemChanged"
+        } else {
+            title = itemInfo.channel
+        }
+    }
+
+    var msg = itemInfo.data.name
+
+    return loadUsersFromChannel(itemInfo.channel)
+        .then(ids => {
+            console.log("Received user IDs: " + ids)
+            let promises = []
+            for (var i = 0; i < ids.length; i++) {
+                promises.push(getUser(ids[i]))
+            }
+            return Promise.all(promises)
+                .then(results => {
+
+                    let tokens = []
+                    for (var i = 0; i < results.length; i++) {
+                        const user = results[i]
+                        const pushToken = user.currentPushToken;
+                        if (pushToken) {
+                            tokens.push(pushToken)
+                        }
+                    }
+                    if (tokens.length > 0) {
+                        console.log("Trying to send notification with title '" + title + "' and body '" + msg + "'")
+                        let payload = {
+                            notification: {
+                                title: title,
+                                body: msg ? msg : "some body",
+                                sound: 'default',
+                                badge: '1'
+                            }
+                        };
+                        return admin.messaging().sendToDevice(tokens, payload);
+                    }
+                }).catch(err => {
+                    console.log(err)
+                })
+        })
+}
 
 function loadUsersFromChannel(channelId) {
     let ref = admin.database()
-        .ref('/members/' + channelId)
+        .ref('/' + MEMBERS_NODE + '/' + channelId)
     let promise = new Promise((resolve, reject) => {
         ref.once('value', snap => {
             let data = snap.val()
@@ -161,7 +227,7 @@ function loadUsersFromChannel(channelId) {
 
 function getUser(id) {
     console.log("Fetching user " + id)
-    let ref = admin.database().ref('/users/' + id)
+    let ref = admin.database().ref('/' + USERS_NODE + '/' + id)
     let promise = new Promise((resolve, reject) => {
         ref.once('value', snap => {
             let user = snap.val()
@@ -179,24 +245,30 @@ function getUser(id) {
 //###########################
 
 exports.handleChannelsWrite = functions.database
-    .ref('/channels/{id}')
+    .ref('/' + CHANNELS_NODE + '/{id}')
     .onWrite(event => {
         var value = event.data.val()
         if (value.key) {
             var channelId = value.key
-            var parent = event.data.ref.parent
             //Check if this is a new channel with poperly setup properties
             let channelCreated = !event.data.previous.exists()
+            let channelDeleted = !channelCreated && !event.data.exists()
             let channelStateChanged = !channelCreated && event.data.changed()
             if (channelCreated && !value.members && !value.lastEntry) {
                 console.log(
                     'Removing ' + channelId + ' due to no members and no items'
                 )
+                var parent = event.data.ref.parent
                 return parent.child(channelId).remove()
             } else if (!channelStateChanged) {
                 console.log('New channel ' + channelId + ' validated and successfully created')
                 console.log('TODO: inform users')
                 return
+            } else if (channelDeleted) {
+                //Channel is deleted, remove all references
+                return admin.database()
+                    .ref('/' + ITEMS_NODE)
+                    .remove(channelId)
             }
         }
     })
@@ -211,19 +283,19 @@ exports.handleUserAdd = functions.database
         if (isNew) {
             console.log('Adding new member ' + userId + ' of channel ' + channelId + ' to member and user channel lists')
             var userUpdate = admin.database()
-                .ref('/users/' + userId + '/channels/' + channelId)
+                .ref('/' + USERS_NODE + '/' + userId + '/' + CHANNELS_NODE + '/' + channelId)
                 .set(true)
             var membersUpdate = admin.database()
-                .ref('/members/' + channelId + '/' + userId)
+                .ref('/' + MEMBERS_NODE + '/' + channelId + '/' + userId)
                 .set(true)
             return Promise.all([userUpdate, membersUpdate])
         } else if (wasDeleted) {
-           console.log('Removing member ' + userId + ' of channel ' + channelId + ' from member and user channel lists')
-             var userUpdate = admin.database()
-                .ref('/users/' + userId + '/channels/' + channelId)
+            console.log('Removing member ' + userId + ' of channel ' + channelId + ' from member and user channel lists')
+            var userUpdate = admin.database()
+                .ref('/' + USERS_NODE + '/' + userId + '/' + CHANNELS_NODE + '/' + channelId)
                 .remove()
             var membersUpdate = admin.database()
-                .ref('/members/' + channelId + '/' + userId)
+                .ref('/' + MEMBERS_NODE + '/' + channelId + '/' + userId)
                 .remove()
             return Promise.all([userUpdate, membersUpdate])
         }
@@ -233,9 +305,9 @@ exports.handleUserAdd = functions.database
 //######## Helpers #########
 //##########################
 
-function markUserAsDeleted(key, deleted) {
+function setUserDeletedField(key, deleted) {
     let ref = admin.database()
-        .ref('/users')
+        .ref('/' + USERS_NODE)
     return ref.once('value', snap => {
         if (snap.hasChild(key)) {
             return ref.child(key).update({
@@ -252,9 +324,20 @@ function markUserAsDeleted(key, deleted) {
 }
 
 function getDisplayNameFromMail(mail) {
-    return getFirstNameFromMail(mail)
-        + " "
-        + getLastNameFromMail(mail)
+    let firstName = getFirstNameFromMail(mail)
+    let lastName = getLastNameFromMail(mail)
+    var displayName = null
+    if (firstName != null) {
+        displayName = firstName
+    }
+    if (lastName != null) {
+        if (firstName != null) {
+            displayName = displayName + ' ' + lastName
+        } else {
+            displayName = lastName
+        }
+    }
+    return displayName
 }
 
 function getIdFromMail(mail) {
@@ -294,7 +377,7 @@ function getFirstNameFromMail(mail) {
     if (prefix) {
         var arr;
         if (prefix.includes(".")) {
-            arr = prefix.split("\\.");
+            arr = prefix.split(".");
         } else if (prefix.includes("-")) {
             arr = prefix.split("-");
         } else if (prefix.includes("_")) {
@@ -317,7 +400,7 @@ function getLastNameFromMail(mail) {
     if (prefix) {
         var arr;
         if (prefix.includes(".")) {
-            arr = prefix.split("\\.");
+            arr = prefix.split(".");
         } else if (prefix.includes("-")) {
             arr = prefix.split("-");
         } else if (prefix.includes("_")) {

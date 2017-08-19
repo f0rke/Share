@@ -35,6 +35,17 @@ public class ItemsPresenter implements ItemsScreen.Presenter {
             onItemsFetchFailed(e);
         }
     };
+    private DBController.RetrieveCallback<List<Item>> mRecurringUpdateListener = new DBController.RetrieveCallback<List<Item>>() {
+        @Override
+        public void onSuccess(List<Item> result) {
+            onItemsFetched(result);
+        }
+
+        @Override
+        public void onError(Exception e) {
+            //TODO
+        }
+    };
 
     private Channel mChannel;
 
@@ -47,6 +58,14 @@ public class ItemsPresenter implements ItemsScreen.Presenter {
     public void bindView(ItemsScreen.View view) {
         this.mView = view;
         update();
+    }
+
+    @Override
+    public void unbindView() {
+        mView = null;
+        if (mChannel != null) {
+            this.mDb.unregisterFromItemListChanges(mChannel, mRecurringUpdateListener);
+        }
     }
 
     @Override
@@ -74,7 +93,9 @@ public class ItemsPresenter implements ItemsScreen.Presenter {
         if (mView != null) {
             mView.showProgress();
         }
-        mDb.listenForItems(mChannel,mItemsFetchCallback);
+        if (mChannel != null) {
+            this.mDb.registerForFutureItemListChanges(mChannel, mRecurringUpdateListener);
+        }
         mDb.fetchItems(mChannel, mItemsFetchCallback);
     }
 
@@ -90,7 +111,6 @@ public class ItemsPresenter implements ItemsScreen.Presenter {
     }
 
     private void onItemsFetchFailed(Exception e) {
-
         itemFetchFinished();
     }
 
@@ -106,11 +126,6 @@ public class ItemsPresenter implements ItemsScreen.Presenter {
 
     private void onItemsUpdate(List<Item> items) {
 
-    }
-
-    @Override
-    public void unbindView() {
-        mView = null;
     }
 
     @Override

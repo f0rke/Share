@@ -3,6 +3,7 @@ package de.koechig.share.util;
 import android.content.Context;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,22 +16,30 @@ import de.koechig.share.R;
  * Created by Mumpi_000 on 02.08.2017.
  */
 
-public class TimestampHelper {
+public class DateHelper {
 
     private final Context mContext;
+    private final SimpleDateFormat mDatabaseFormat;
 
-    public TimestampHelper(Context c) {
+    public DateHelper(Context c) {
         this.mContext = c;
+        this.mDatabaseFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        this.mDatabaseFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public String toSmartDisplayTime(long timestamp) {
+    public String toSmartDisplayTime(String date) {
         Calendar that = Calendar.getInstance();
-        that.setTimeInMillis(timestamp);
+        try {
+            that.setTime(mDatabaseFormat.parse(date));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         Calendar current = Calendar.getInstance();
 
         if (current.get(Calendar.DAY_OF_YEAR) == that.get(Calendar.DAY_OF_YEAR)
                 && current.get(Calendar.YEAR) == that.get(Calendar.YEAR)) {
             //This is the same day
+            //TODO
         } else {
             int today = current.get(Calendar.DAY_OF_YEAR);
             int thatDay = that.get(Calendar.DAY_OF_YEAR);

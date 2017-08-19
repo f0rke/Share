@@ -18,7 +18,7 @@ import de.koechig.share.R;
 import de.koechig.share.base.ListItem;
 import de.koechig.share.control.AuthController;
 import de.koechig.share.model.Item;
-import de.koechig.share.util.TimestampHelper;
+import de.koechig.share.util.DateHelper;
 
 /**
  * Created by Mumpi_000 on 22.06.2017.
@@ -26,7 +26,7 @@ import de.koechig.share.util.TimestampHelper;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     @Inject
-    TimestampHelper mHelper;
+    DateHelper mHelper;
     @Inject
     AuthController mAuth;
     protected List<ListItem> mListItems;
@@ -70,7 +70,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.time.setText(mHelper.toSmartDisplayTime(item.getCreationDate()));
         holder.username.setText(item.getCreatorFirstName());
         holder.item_text.setText(item.getName());
-        holder.rootView.setForegroundGravity(Gravity.RIGHT);
     }
 
     @Override

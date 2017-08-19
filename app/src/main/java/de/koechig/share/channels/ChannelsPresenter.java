@@ -22,6 +22,7 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         @Override
         public void onUpdated() {
             updateSideMenu();
+            loadData();
         }
     };
     private final ResourceProvider mProvider;
@@ -80,7 +81,9 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
         mView = view;
         update();
         mAuth.addListener(mUserListener);
-        mDb.registerForFutureChannelListChanges(mAuth.getCurrentUser(), mRecurringUpdateListener);
+        if (mAuth.getCurrentUser() != null) {
+            mDb.registerForFutureChannelListChanges(mAuth.getCurrentUser(), mRecurringUpdateListener);
+        }
     }
 
     @Override
@@ -91,7 +94,9 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
 
     @Override
     public void unbindView() {
-        mDb.deregisterFromChannelListChanges(mRecurringUpdateListener);
+        if (mAuth.getCurrentUser() != null) {
+            mDb.unregisterFromChannelListChanges(mAuth.getCurrentUser(), mRecurringUpdateListener);
+        }
         mAuth.removeListener(mUserListener);
         mView = null;
     }
@@ -108,26 +113,33 @@ public class ChannelsPresenter implements ChannelsScreen.Presenter {
     }
 
     private void loadData() {
-        mDb.fetchChannelsForUser(mAuth.getCurrentUser(), new DBController.RetrieveCallback<List<Channel>>() {
-            @Override
-            public void onSuccess(List<Channel> result) {
-                if (result.size() == 1 && !mSingleChannelShortCutUsed) {
-                    onChannelClicked(result.get(0));
-                    mSingleChannelShortCutUsed = true;
-                } else {
+        User user = mAuth.getCurrentUser();
+        if (user != null) {
+            mDb.fetchChannelsForUser(mAuth.getCurrentUser(), new DBController.RetrieveCallback<List<Channel>>() {
+                @Override
+                public void onSuccess(List<Channel> result) {
+//                    if (result.size() == 1 && !mSingleChannelShortCutUsed) {
+//                        onChannelClicked(result.get(0));
+//                        mSingleChannelShortCutUsed = true;
+//                    } else {
+                        if (mView != null) {
+                            mView.showChannels(result);
+                        }
+//                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
                     if (mView != null) {
-                        mView.showChannels(result);
+                        mView.showError(e);
                     }
                 }
+            });
+        } else {
+            if (mView != null) {
+                mView.showChannels(null);
             }
-
-            @Override
-            public void onError(Exception e) {
-                if (mView != null) {
-                    mView.showError(e);
-                }
-            }
-        });
+        }
     }
 
     private void updateSideMenu() {

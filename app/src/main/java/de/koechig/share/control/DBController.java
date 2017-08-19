@@ -45,6 +45,10 @@ public class DBController {
     private static final String CHANNELS_NODE = "channels";
     private static final String ITEMS_NODE = "items";
 
+    //Listeners
+    private Map<RetrieveCallback<List<Channel>>, ValueEventListener> mChannelListeners = new HashMap<>();
+    private Map<RetrieveCallback<List<Item>>, ValueEventListener> mItemListeners = new HashMap<>();
+
     public DBController(DatabaseReference mDatabase, StringHelper stringHelper, DatabaseStringsProvider provider) {
         this.mDatabase = mDatabase;
         this.mStringHelper = stringHelper;
@@ -76,7 +80,6 @@ public class DBController {
     }
 
     public void createUser(final String uid, String mail, final RetrieveCallback<User> callback) {
-//        final String key = mStringHelper.getIdFromMail(mail);
         if (uid != null && mail != null) {
             final User user = new User(uid, mail);
             String first = mStringHelper.getFirstNameFromMail(mail);
@@ -121,9 +124,6 @@ public class DBController {
     //</editor-fold>
 
     //<editor-fold desc="# Channels #">
-
-    private Map<RetrieveCallback<List<Channel>>, ValueEventListener> mChannelListeners = new HashMap<>();
-
     public void registerForFutureChannelListChanges(final User user, @NonNull final RetrieveCallback<List<Channel>> listener) {
         ValueEventListener keyListener = new ValueEventListener() {
             boolean firstCall = true;
@@ -146,8 +146,10 @@ public class DBController {
         mDatabase.child(USERS_NODE).child(user.getUid()).child(CHANNELS_NODE).addValueEventListener(keyListener);
     }
 
-    public void deregisterFromChannelListChanges(@NonNull final RetrieveCallback<List<Channel>> listener) {
+    public void unregisterFromChannelListChanges(User user, @NonNull final RetrieveCallback<List<Channel>> listener) {
+        ValueEventListener keyListener = mChannelListeners.get(listener);
         mChannelListeners.remove(listener);
+        mDatabase.child(USERS_NODE).child(user.getUid()).child(CHANNELS_NODE).removeEventListener(keyListener);
     }
 
     public void fetchChannelsForUser(User user, final RetrieveCallback<List<Channel>> callback) {
@@ -260,6 +262,34 @@ public class DBController {
     //</editor-fold>
 
     //<editor-fold desc="# Items #">
+    public void registerForFutureItemListChanges(final Channel channel, @NonNull final RetrieveCallback<List<Item>> listener) {
+        ValueEventListener keyListener = new ValueEventListener() {
+            boolean firstCall = true;
+
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                if (firstCall) {
+                    firstCall = false;
+                } else {
+                    fetchItems(channel, listener);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mItemListeners.put(listener, keyListener);
+        mDatabase.child(ITEMS_NODE).child(channel.getKey()).addValueEventListener(keyListener);
+    }
+
+    public void unregisterFromItemListChanges(Channel channel, @NonNull final RetrieveCallback<List<Item>> listener) {
+        ValueEventListener keyListener = mItemListeners.get(listener);
+        mItemListeners.remove(listener);
+        mDatabase.child(ITEMS_NODE).child(channel.getKey()).removeEventListener(keyListener);
+    }
+
     public void fetchItems(Channel channel, final RetrieveCallback<List<Item>> callback) {
         mDatabase.child(ITEMS_NODE).child(channel.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -345,6 +375,8 @@ public class DBController {
             @NonNull final String channelKey,
             @NonNull final User creator,
             @NonNull final ActionCallback callback) {
+        String key = mDatabase.child(ITEMS_NODE).child(channelKey).push().getKey();
+        item.setKey(key);
         mDatabase.child(ITEMS_NODE).child(channelKey).child(item.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -354,10 +386,6 @@ public class DBController {
                 } else {
                     //Start transaction, create channel, link users to channel
                     Map<String, Object> update = new HashMap<>();
-                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastEntryTimestamp", item.getCreationDate());
-                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastEntry", item.getKey());
-                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastContributor", creator.getKey());
-                    update.put(CHANNELS_NODE + "/" + channelKey + "/lastContributorFirstName", creator.getFirstName());
                     update.put(ITEMS_NODE + "/" + channelKey + "/" + item.getKey(), item);
                     mDatabase.updateChildren(update, new DatabaseReference.CompletionListener() {
                         @Override
@@ -365,7 +393,6 @@ public class DBController {
                             if (databaseError != null) {
                                 callback.onFailed(databaseError.toException());
                             } else {
-//                                mDatabase.child(ITEMS_NODE).child(channelKey).orderByChild("creationDate");
                                 callback.onSucceeded();
                             }
                         }

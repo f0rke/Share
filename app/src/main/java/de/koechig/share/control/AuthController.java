@@ -79,34 +79,46 @@ public class AuthController {
             return;
         }
         if (mAuth.getCurrentUser() != null) {
-            final String mail = mAuth.getCurrentUser().getEmail();
-            final String uid = mAuth.getCurrentUser().getUid();
-            mDB.fetchUser(uid, new DBController.RetrieveCallback<User>() {
+            mAuth.getCurrentUser().reload().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
-                public void onSuccess(User result) {
-                    if (result == null) {
-                        createUser(uid, mail, new Callback() {
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
+                        final String mail = mAuth.getCurrentUser().getEmail();
+                        final String uid = mAuth.getCurrentUser().getUid();
+                        mDB.fetchUser(uid, new DBController.RetrieveCallback<User>() {
                             @Override
-                            public void onSuccess() {
-                                callback.onFinish();
+                            public void onSuccess(User result) {
+                                if (result == null) {
+                                    createUser(uid, mail, new Callback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            callback.onFinish();
+                                        }
+
+                                        @Override
+                                        public void onFailure(Exception reason) {
+                                            callback.onFinish();
+                                        }
+                                    });
+                                } else {
+                                    updateUser(result);
+                                    callback.onFinish();
+                                }
                             }
 
                             @Override
-                            public void onFailure(Exception reason) {
+                            public void onError(Exception e) {
+                                FirebaseCrash.logcat(Log.ERROR, "users", e.getMessage());
+                                FirebaseCrash.report(e);
                                 callback.onFinish();
                             }
                         });
                     } else {
-                        updateUser(result);
+                        if (!task.isSuccessful()) {
+                            mAuth.signOut();
+                        }
                         callback.onFinish();
                     }
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    FirebaseCrash.logcat(Log.ERROR, "users", e.getMessage());
-                    FirebaseCrash.report(e);
-                    callback.onFinish();
                 }
             });
         } else {

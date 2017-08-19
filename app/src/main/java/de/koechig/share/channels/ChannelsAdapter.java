@@ -15,10 +15,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.koechig.share.base.ListItem;
 import de.koechig.share.R;
-import de.koechig.share.items.ItemAdapter;
 import de.koechig.share.model.Channel;
 import de.koechig.share.util.StringHelper;
-import de.koechig.share.util.TimestampHelper;
+import de.koechig.share.util.DateHelper;
 
 /**
  * Created by Mumpi_000 on 21.06.2017.
@@ -26,7 +25,7 @@ import de.koechig.share.util.TimestampHelper;
 public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.ChannelViewHolder> {
 
     @Inject
-    TimestampHelper mTimestampHelper;
+    DateHelper mDateHelper;
     @Inject
     StringHelper mStringHelper;
     protected List<ListItem> mListItems;
@@ -39,6 +38,9 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.Channe
     }
 
     public void replaceList(List<Channel> list) {
+        if (list == null) {
+            list = new ArrayList<>(0);
+        }
         populateList(list);
         notifyDataSetChanged();
     }
@@ -99,9 +101,9 @@ public class ChannelsAdapter extends RecyclerView.Adapter<ChannelsAdapter.Channe
         } else {
             holder.lastEntry.setText("");
         }
-        Long lastTimestamp = channel.getLastEntryTimestamp();
-        if (lastText != null && !lastText.isEmpty()) {
-            holder.lastEntryTimestamp.setText(mTimestampHelper.toSmartDisplayTime(lastTimestamp));
+        String lastDate = channel.getLastEntryDate();
+        if (lastDate != null && !lastDate.isEmpty()) {
+            holder.lastEntryTimestamp.setText(mDateHelper.toSmartDisplayTime(lastDate));
         } else {
             holder.lastEntryTimestamp.setText("");
         }

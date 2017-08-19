@@ -17,7 +17,7 @@ public class Channel extends DB_Item {
     private Map<String, Boolean> members;
     private String lastEntry;
     private String lastContributor;
-    private Long lastEntryTimestamp;
+    private String lastEntryDate;
     private String name;
     private String lastContributorFirstName;
 
@@ -53,8 +53,8 @@ public class Channel extends DB_Item {
         return lastContributor;
     }
 
-    public Long getLastEntryTimestamp() {
-        return lastEntryTimestamp;
+    public String getLastEntryDate() {
+        return lastEntryDate;
     }
 
     public String getName() {
